@@ -6,6 +6,7 @@ Format: Keep a Changelog-inspired. Future release notes will follow semantic ver
 ### Added
 - M3 disabled local-only fixtures/standings gateway with free-plan/rights/key gates, request limits and offline tests.
 - Standings normalization preserving official positions/deductions and excluding artwork.
+- Vitest 4.1.12 and a scoped patched minimatch override to address dependency audit findings.
 - Frontend lockfile; CI now uses npm ci, checks server types/build and a browser secret sentinel.
 - Local gateway setup, provider terms findings, quota boundaries and remaining rollout gates.
 - Milestone 1 initial documentation set: requirements, user stories, architectural proposal, provider evaluation, free-cost guardrails, accessibility/security/testing/deployment/operations plans.
