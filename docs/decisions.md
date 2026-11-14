@@ -17,3 +17,6 @@ Date: 2026-11-14. Status: **Accepted**. Score freshness must be correctly labele
 - Whether any zero-cost backend can reliably secure a provider token while respecting API terms.
 - Which leagues/competitions free feed can actually display; what logo licensing permits.
 - When (or if) Supabase is worth adding.
+
+## ADR-005 — Local-only provider evaluation before hosting
+Date: 2026-11-15. Status: **Accepted for development**. Implement a disabled-by-default loopback gateway for PL fixtures/current standings, no data cache or artwork, explicit Free-plan/rights/key gates and bounded requests. Preserve sample UI. Process-local counters are unsuitable for public/multi-instance hosting. [Details and rollout gates](m3-local-gateway.md).

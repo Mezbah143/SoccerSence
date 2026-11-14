@@ -28,3 +28,7 @@ describe('football-data.org v4 response adapter', () => {
     expect(normalizeFootballDataList({matches:[{}, {id:5,utcDate:'2026-11-16T18:00:00Z'}]}, fetched)).toHaveLength(1)
   })
 })
+
+it.each([-1, 1.5, Number.POSITIVE_INFINITY])('rejects an impossible score from %s', score => {
+  expect(normalizeFootballDataMatch({id: 1, utcDate: fetched, score: {fullTime: {home: score, away: 0}}}, fetched)).toMatchObject({homeScore: null, awayScore: 0})
+})

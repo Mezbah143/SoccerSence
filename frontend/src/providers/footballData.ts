@@ -28,7 +28,7 @@ type ProviderMatch = {
 }
 const nameOr = (value: unknown, fallback: string) =>
   typeof value === 'string' && value.trim() ? value : fallback
-const scoreOrNull = (value: unknown) => typeof value === 'number' && Number.isFinite(value) ? value : null
+const scoreOrNull = (value: unknown) => typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? value : null
 
 /** Fail closed: invalid identifiers or kickoff values must not appear as real match results. */
 export function normalizeFootballDataMatch(value: unknown, fetchedAt: string): MatchView | null {
