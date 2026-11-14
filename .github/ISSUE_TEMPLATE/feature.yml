@@ -1,0 +1,39 @@
+name: Feature request
+description: Propose a feature with acceptance criteria and free-source validation
+title: "[Feature] "
+labels: []
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: Who benefits and what is the observable problem?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and proposed solution
+      description: Describe screens, data, error and empty states.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Include verifiable tests and accessibility checks.
+      placeholder: "- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: free
+    attributes:
+      label: Zero-cost and licensing checks
+      description: Identify provider links, usage caps, attribution, permission to display, billing risks and fallback.
+    validations:
+      required: true
+  - type: textarea
+    id: docs
+    attributes:
+      label: Documentation and testing updates
+      description: List affected docs and tests.

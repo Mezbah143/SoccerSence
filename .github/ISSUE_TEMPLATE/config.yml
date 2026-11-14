@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://github.com/Mezbah143/SoccerSence/tree/main/docs
+    about: Read the project specification after Milestone 1 is merged.
