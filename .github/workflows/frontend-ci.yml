@@ -1,0 +1,52 @@
+name: Frontend checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Lint, types, tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # Temporary npm install until a lockfile is checked in.
+      # See Issue #2: replace with 'npm ci' and enable npm cache.
+      - name: Install free open-source dependencies
+        run: npm install --no-audit --no-fund
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm run test
+      - name: Production build
+        run: npm run build
+      - name: Guard against bundled API credentials
+        run: |
+          if grep -r -E 'FOOTBALL_API_KEY|BEGIN PRIVATE KEY' dist --include='*.js' --include='*.html'; then
+            echo 'Possible secret marker found in generated client bundle!'
+            exit 1
+          fi
