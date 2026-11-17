@@ -104,4 +104,38 @@ describe('local provider gateway', () => {
   it('rejects wrong content types, invalid JSON and oversized bodies', async () => {
     for (const response of [new Response('{}'), new Response('{', {headers: {'content-type': 'application/json'}}), json({matches: [], extra: 'x'.repeat(512 * 1024)})]) expect((await createGateway(config, vi.fn<typeof fetch>().mockResolvedValue(response))(route)).status).toBe(502)
   })
+  it('returns only the requested UTC day even when provider returns adjacent dates', async () => {
+    const requested = '/api/fixtures?competition=PL&date=2026-11-21'
+    const responses = [
+      { ...match, id: 30, utcDate: '2026-11-21T12:30:00Z' },
+      { ...match, id: 31, utcDate: '2026-11-21T23:59:59Z' },
+      { ...match, id: 32, utcDate: '2026-11-22T00:00:00Z' },
+      { ...match, id: 33, utcDate: '2026-11-22T16:30:00Z' },
+      { ...match, id: 34, utcDate: '2026-11-20T23:59:59Z' },
+    ]
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(json({ matches: responses }))
+    const result = await createGateway(config, fetcher, () => Date.parse('2026-11-17T05:51:19Z'))(requested)
+    expect(result.status).toBe(200)
+    expect(fetcher.mock.calls[0][0]).toBe('https://api.football-data.org/v4/competitions/PL/matches?dateFrom=2026-11-21&dateTo=2026-11-22')
+    const returned = result.body.matches as {id:string; kickoffUtc:string}[]
+    expect(returned.map(m => m.id)).toEqual(['30', '31'])
+    expect(returned.every(m => m.kickoffUtc.slice(0,10) === '2026-11-21')).toBe(true)
+    expect(result.body).toMatchObject({source: 'football-data.org', freshness: 'delayed'})
+  })
+  it('treats valid adjacent-day-only records as an empty requested UTC day', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(json({
+      matches: [{ ...match, utcDate: '2026-11-22T14:00:00Z' }],
+    }))
+    const result = await createGateway(config, fetcher)('/api/fixtures?competition=PL&date=2026-11-21')
+    expect(result.status).toBe(200)
+    expect(result.body.matches).toEqual([])
+  })
+  it('rejects corrupt records even if they would fall outside the requested day', async () => {
+    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(json({
+      matches: [{ ...match, utcDate: '2026-11-15T13:00:00Z' }, { id: 'bad', utcDate: '2026-11-22T14:00:00Z' }],
+    }))
+    const result = await createGateway(config, fetcher)(route)
+    expect(result.status).toBe(502)
+  })
+
 })
