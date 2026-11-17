@@ -40,6 +40,6 @@ describe('local fixtures UI adapter',()=>{
   })
   it('labels kickoff in Korea local time while fetching UTC day',()=>{
     expect(utcKickoffLabel('2026-11-21T12:30:00Z')).toContain('21:30')
-    expect(utcKickoffLabel('2026-11-21T15:00:00Z')).toContain('Nov 22')
+    expect(utcKickoffLabel('2026-11-21T15:00:00Z')).toContain('22 Nov')
   })
 })
