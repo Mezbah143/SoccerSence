@@ -1,11 +1,12 @@
 import {useEffect,useRef,useState} from 'react'
+import {Link} from 'react-router-dom'
 import {CalendarDays,Clock3,Info} from 'lucide-react'
 import {loadLocalFixtures,utcKickoffLabel,type LocalFixturesResult} from './localFixtures'
 
 const utcToday = () => new Date().toISOString().slice(0,10)
-export function LocalMatchCentre() {
-  const [date,setDate]=useState(utcToday)
-  const [result,setResult]=useState<LocalFixturesResult|null>(null)
+export function LocalMatchCentre({initialDate,initialResult}:{initialDate?:string;initialResult?:LocalFixturesResult|null}) {
+  const [date,setDate]=useState(initialDate??utcToday)
+  const [result,setResult]=useState<LocalFixturesResult|null>(initialResult??null)
   const [error,setError]=useState('')
   const [loading,setLoading]=useState(false)
   const controller=useRef<AbortController|null>(null)
@@ -52,12 +53,12 @@ export function LocalMatchCentre() {
     </div>}
     {result&&result.matches.length===0&&<div className="empty"><CalendarDays size={32} aria-hidden="true"/><h3>No fixtures for this UTC date</h3><p>Try another day. No fictional matches are displayed in this mode.</p></div>}
     {result&&result.matches.length>0&&<div className="match-grid">
-      {result.matches.map(match=><article className="match-card" key={match.id}>
+      {result.matches.map(match=><Link to={'/real-match/'+match.id} state={{day:date,result}} className="match-card" key={match.id} aria-label={'Match details: '+match.home+' versus '+match.away}>
         <div className="match-meta"><span>● {match.competition}</span><span className="pill">{match.status==='FINISHED'?'Full time':match.status==='TIMED'?'Scheduled':match.status}</span></div>
         <div className="team"><span><b className="crest" aria-hidden="true">{match.home.slice(0,2).toUpperCase()}</b>{match.home}</span><strong>{match.homeScore??'–'}</strong></div>
         <div className="team"><span><b className="crest purple" aria-hidden="true">{match.away.slice(0,2).toUpperCase()}</b>{match.away}</span><strong>{match.awayScore??'–'}</strong></div>
-        <div className="match-bottom"><Clock3 size={14} aria-hidden="true"/>{utcKickoffLabel(match.kickoffUtc)}<span>Delayed · {match.status}</span></div>
-      </article>)}
+        <div className="match-bottom"><Clock3 size={14} aria-hidden="true"/>{utcKickoffLabel(match.kickoffUtc)}<span>View details ›</span></div>
+      </Link>)}
     </div>}
   </section>
 }
