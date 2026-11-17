@@ -32,10 +32,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      # Temporary npm install until a lockfile is checked in.
-      # See Issue #2: replace with 'npm ci' and enable npm cache.
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
       - name: Install free open-source dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Lint
         run: npm run lint
       - name: Typecheck
@@ -43,10 +43,14 @@ jobs:
       - name: Unit tests
         run: npm run test
       - name: Production build
+        env:
+          FOOTBALL_API_KEY: SOCCERSENSE_TEST_ONLY_SECRET_SENTINEL
         run: npm run build
+      - name: Build local data gateway
+        run: npm run build:server
       - name: Guard against bundled API credentials
         run: |
-          if grep -r -E 'FOOTBALL_API_KEY|BEGIN PRIVATE KEY' dist --include='*.js' --include='*.html'; then
+          if grep -r -q -E 'SOCCERSENSE_TEST_ONLY_SECRET_SENTINEL|FOOTBALL_API_KEY|X-Auth-Token|BEGIN PRIVATE KEY' dist --include='*.js' --include='*.html'; then
             echo 'Possible secret marker found in generated client bundle!'
             exit 1
           fi

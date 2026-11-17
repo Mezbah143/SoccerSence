@@ -1,6 +1,6 @@
 # M3 football provider evaluation — 2026-11-15
 
-Status: **research and offline response contract only**. No football API account, token, live feed, backend, or paid service was provisioned.
+Status: **disabled local backend implemented; no real feed enabled**. See [local gateway](m3-local-gateway.md) for the current implementation, dated terms review and remaining gates. No provider account, token, hosted backend or paid service was provisioned.
 
 ## Recommendation
 First candidate: [football-data.org](https://www.football-data.org/pricing) free plan: **12 competitions, delayed scores, fixtures, delayed schedules, league tables and 10 calls/minute**. The paid live-score plan is **not** allowed under SoccerSense's $0 policy. Free score results must carry a visible **delayed** label and a fetched-at timestamp. Do not advertise them as live.
@@ -23,7 +23,7 @@ Provider authentication uses header `X-Auth-Token`. **Do not call with token fro
 
 ## Decisions and blockers
 1. **Not a live feed:** free scores are delayed; match status in API is not proof of data being near real time.
-2. **Rights unverified:** no authorization for public redisplay or caching is assumed. Verify terms, attribution, logo/trademark rights, commercial restrictions, allowed persistence before deployment.
+2. **Public-use assessment incomplete:** published terms and attribution were reviewed on 2026-11-15; see the local gateway review. No blanket redisplay/caching or logo permission is assumed. Confirm account-specific use and retention before deployment.
 3. **Free-host feasibility:** check real quotas and whether requests can be hard-capped with no overage billing; no card-required activation.
 4. **Coverage:** list supported competitions with a valid key, check 403/429 responses and missing statistics.
 5. **Budget model:** begin at 0 scheduled poll requests; serve cached responses per date/competition; throttling shared among visitors. Recalculate once traffic estimates and allowed cache TTL are known.

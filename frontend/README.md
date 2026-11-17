@@ -1,28 +1,31 @@
-# SoccerSense frontend — Milestone 2 (proposed)
+# SoccerSense frontend and local data gateway
 
-The first responsive React/TypeScript/Vite UI uses entirely **fictional sample data**. No live results, authentication, backend, or paid resource has been enabled.
+The React/TypeScript/Vite UI uses **fictional sample data**. Match cards, filters, date controls, details, and a standings placeholder exist. No real feed or public deployment is enabled; an earlier illustrative image is not an implementation screenshot.
 
 ## Getting started
-Requires a compatible current Node.js LTS (Node 22 recommended) and npm.
-```bash
+
+Use Node 22.12+ or Node 24 and npm:
+
+```sh
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
-Open the localhost URL shown by Vite.
+
+Open Vite's localhost URL. `package-lock.json` pins the dependency tree; use `npm ci` for repeatable installation. Change dependencies intentionally with `npm install`, reviewing the manifest and lockfile together.
 
 ## Validation
-```bash
+
+```sh
 npm run typecheck
-npm run test
+npm run lint
+npm test
 npm run build
+npm run build:server
 ```
-These commands are supplied but have **not yet been run in an authenticated build environment**. A `package-lock.json` must be generated with `npm install` and committed before Issue #2 can be considered done. Add lint/CI afterward under Issue #4.
 
-## Features
-- Match cards, competition filter, previous/next date controls, detail route
-- Standings and About placeholder routes
-- Visible sample-data banner and no false live data claims
-- Dark mobile-first visual design
+Tests use invented data and a local HTTP server; no API key or external provider connection is required. CI runs the same gates on Node 22.
 
-See root `docs/` for requirements, security and zero-cost policy.
+## Optional local backend
+
+`npm run serve:data` starts a gateway on `127.0.0.1:8787`. It returns `provider_disabled` by default and is not wired to the browser. See [local gateway setup, rights gates, request limits and remaining work](../docs/m3-local-gateway.md). Never put provider credentials in Vite variables. Do not deploy or expose this local-only server publicly.

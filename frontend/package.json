@@ -6,27 +6,35 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.server.check.json",
     "lint": "eslint .",
     "test": "vitest run",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:server": "tsc -p tsconfig.server.json",
+    "serve:data": "npm run build:server && node --env-file-if-exists=.env.server .server/server/index.js"
   },
   "dependencies": {
+    "lucide-react": "^0.468.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.0.0",
-    "lucide-react": "^0.468.0"
+    "react-router-dom": "^7.0.0"
   },
   "devDependencies": {
-    "typescript": "~5.9.0",
-    "vite": "^6.0.0",
-    "@vitejs/plugin-react": "^4.3.0",
+    "@eslint/js": "^9.0.0",
+    "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "vitest": "^3.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
     "eslint": "^9.0.0",
-    "@eslint/js": "^9.0.0",
+    "globals": "^15.0.0",
+    "typescript": "~5.9.0",
     "typescript-eslint": "^8.0.0",
-    "globals": "^15.0.0"
+    "vite": "^6.0.0",
+    "vitest": "^4.1.12"
+  },
+  "overrides": {
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "11.0.1"
+    }
   }
 }
