@@ -8,7 +8,7 @@ export type GatewayConfig = { enabled: boolean; freePlanConfirmed: boolean; righ
 export type GatewayResult = { status: number; body: Record<string, unknown>; retryAfter?: number }
 export const error = (status: number, code: string): GatewayResult => ({ status, body: { error: code } })
 
-function parseRoute(path: string): { upstream: string; kind: 'fixtures' | 'standings' } | null {
+function parseRoute(path: string): { upstream: string; kind: 'fixtures' | 'standings'; date?: string } | null {
   if (!path.startsWith('/api/') || path.includes('#')) return null
   const url = new URL(path, 'http://127.0.0.1:8787')
   const keys = [...url.searchParams.keys()]
@@ -22,7 +22,7 @@ function parseRoute(path: string): { upstream: string; kind: 'fixtures' | 'stand
   // v4 dateTo is exclusive. Limit every request to one UTC day and one competition.
   const next = new Date(Date.parse(date) + 86_400_000).toISOString().split('T')[0]
   if (!/^\d{4}-\d{2}-\d{2}$/.test(next)) return null
-  return {upstream: `/competitions/PL/matches?dateFrom=${date}&dateTo=${next}`, kind: 'fixtures'}
+  return {upstream: `/competitions/PL/matches?dateFrom=${date}&dateTo=${next}`, kind: 'fixtures', date}
 }
 
 async function boundedJson(response: Response): Promise<unknown> {
@@ -98,7 +98,11 @@ export function createGateway(config: GatewayConfig, fetcher: typeof fetch = fet
       const matches = normalizeFootballDataList(payload, fetchedAt)
       // Do not silently present a partial/corrupt provider response as an empty/successful day.
       if (matches.length !== payload.matches.length) return error(502, 'invalid_provider_response')
-      return {status: 200, body: {...meta, matches}}
+      // Provider date-range responses may include adjacent UTC dates; enforce the requested
+      // calendar day after validating the complete upstream payload. This deliberately
+      // removes legitimately returned adjacent-day records rather than mislabeling them.
+      const dailyMatches = matches.filter(match => match.kickoffUtc.slice(0, 10) === route.date)
+      return {status: 200, body: {...meta, matches: dailyMatches}}
     } catch {
       // Never echo upstream bodies, thrown errors, headers or credentials to users/logs.
       return error(502, 'provider_unavailable')
