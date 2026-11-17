@@ -42,4 +42,16 @@ describe('local fixtures UI adapter',()=>{
     expect(utcKickoffLabel('2026-11-21T12:30:00Z')).toContain('21:30')
     expect(utcKickoffLabel('2026-11-21T15:00:00Z')).toContain('22 Nov')
   })
+  it('selects La Liga with the same credential-free local proxy',async()=>{
+    const fetchMock=vi.fn().mockResolvedValue({ok:true,json:async()=>response})
+    vi.stubGlobal('fetch',fetchMock)
+    await loadLocalFixtures('2026-11-21',undefined,'PD')
+    expect(fetchMock.mock.calls[0][0]).toBe('/api/fixtures?competition=PD&date=2026-11-21')
+  })
+  it('rejects a non-free competition without making a request',async()=>{
+    const fetchMock=vi.fn()
+    vi.stubGlobal('fetch',fetchMock)
+    await expect(loadLocalFixtures('2026-11-21',undefined,'PAID' as 'PL')).rejects.toThrow('invalid_competition')
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
 })
