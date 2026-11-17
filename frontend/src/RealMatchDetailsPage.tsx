@@ -20,9 +20,9 @@ export function RealMatchDetailsPage(){
     <p>Open a real fixture from the local match centre. Match information is kept in the current browser navigation only; reloading this page does not fetch the provider or substitute demo data.</p>
     <Link to="/" state={{mode:'local'}}>Back to fixtures</Link>
   </div>
-  const {match,result,day,competition}=verified
+  const {match,result,day,competition,zone}=verified
   return <section className="detail" aria-label="Real match details">
-    <Link to="/" state={{mode:'local',day,result,competition}}>‹ Back to real fixtures</Link>
+    <Link to="/" state={{mode:'local',day,result,competition,zone}}>‹ Back to real fixtures</Link>
     <div className="detail-card real-detail">
       <p className="kicker">{match.competition} · LOCAL DATA EXPERIMENT</p>
       <div className="real-detail-badges"><span className="pill">{statusLabel(match.status)}</span><span className="pill">Delayed, not live</span></div>
@@ -48,6 +48,6 @@ export function RealMatchDetailsPage(){
     </div>
     <div className="source-panel"><strong>{result.source}</strong> · Delayed data · Retrieved {new Date(result.fetchedAt).toLocaleString('en-GB',{timeZone:'Asia/Seoul'})} KST<div>{result.attribution}</div></div>
     <p className="mode-hint">Local development only. No new API request was made to open this page.</p>
-    <p className="mode-hint">Selected fixture UTC day: {day}</p>
+    <p className="mode-hint">Selected match day ({zone}): {day}</p>
   </section>
 }
