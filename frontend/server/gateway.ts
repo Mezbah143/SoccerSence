@@ -1,6 +1,7 @@
 import { normalizeFootballDataList } from '../src/providers/footballData.js'
 import { normalizeFootballDataStandings } from '../src/providers/standings.js'
 import { isLocalCompetition } from '../src/localCompetitions.js'
+import {fixtureDay,shiftDay,validDay} from '../src/dateNavigation.js'
 
 const UPSTREAM = 'https://api.football-data.org/v4'
 const ATTRIBUTION = 'Football data provided by the Football-Data.org API'
@@ -9,7 +10,7 @@ export type GatewayConfig = { enabled: boolean; freePlanConfirmed: boolean; righ
 export type GatewayResult = { status: number; body: Record<string, unknown>; retryAfter?: number }
 export const error = (status: number, code: string): GatewayResult => ({ status, body: { error: code } })
 
-function parseRoute(path: string): { upstream: string; kind: 'fixtures' | 'standings'; date?: string } | null {
+function parseRoute(path: string): { upstream: string; kind: 'fixtures' | 'standings'; date?: string; zone?: 'UTC'|'KST' } | null {
   if (!path.startsWith('/api/') || path.includes('#')) return null
   const url = new URL(path, 'http://127.0.0.1:8787')
   const keys = [...url.searchParams.keys()]
@@ -19,12 +20,16 @@ function parseRoute(path: string): { upstream: string; kind: 'fixtures' | 'stand
     return { upstream: `/competitions/${competition}/standings`, kind: 'standings' }
   }
   const date = url.searchParams.get('date') ?? ''
-  if (url.pathname !== '/api/fixtures' || keys.length !== 2 || !keys.includes('date') ||
-      !/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0, 10) !== date) return null
-  // v4 dateTo is exclusive. Limit every request to one UTC day and one competition.
-  const next = new Date(Date.parse(date) + 86_400_000).toISOString().split('T')[0]
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(next)) return null
-  return {upstream: `/competitions/${competition}/matches?dateFrom=${date}&dateTo=${next}`, kind: 'fixtures', date}
+  const zone=url.searchParams.get('tz')==='KST'?'KST':'UTC'
+  if(url.searchParams.has('tz') && url.searchParams.get('tz')!=='KST')return null
+  if (url.pathname !== '/api/fixtures' || keys.length !== (zone==='KST'?3:2) || !keys.includes('date') ||
+      !validDay(date)) return null
+  // KST midnight is 15:00 UTC on the previous day. Request two UTC days
+  // in ONE provider call, then enforce the exact Korean calendar day locally.
+  // The existing UTC-day route is retained for old clients and tests.
+  let start:string, next:string
+  try { start=zone==='KST'?shiftDay(date,-1):date;next=shiftDay(date,1) } catch {return null}
+  return {upstream: `/competitions/${competition}/matches?dateFrom=${start}&dateTo=${next}`, kind: 'fixtures', date, zone}
 }
 
 async function boundedJson(response: Response): Promise<unknown> {
@@ -103,7 +108,7 @@ export function createGateway(config: GatewayConfig, fetcher: typeof fetch = fet
       // Provider date-range responses may include adjacent UTC dates; enforce the requested
       // calendar day after validating the complete upstream payload. This deliberately
       // removes legitimately returned adjacent-day records rather than mislabeling them.
-      const dailyMatches = matches.filter(match => match.kickoffUtc.slice(0, 10) === route.date)
+      const dailyMatches = matches.filter(match => fixtureDay(match.kickoffUtc, route.zone ?? 'UTC') === route.date)
       return {status: 200, body: {...meta, matches: dailyMatches}}
     } catch {
       // Never echo upstream bodies, thrown errors, headers or credentials to users/logs.

@@ -33,4 +33,16 @@ describe('real match details navigation',()=>{
     expect(readVerifiedMatchState({day:'2026-11-21',result:{...result,attribution:'unknown'}},'560643')).toBeNull()
     expect(readVerifiedMatchState({day:'2026-11-21',result:{...result,matches:[{...match,homeScore:'2'}]}},'560643')).toBeNull()
   })
+
+  it('preserves KST date and prevents off-KST-day navigation',()=>{
+    const kstResult={...result,matches:[{...match,kickoffUtc:'2026-11-20T15:00:00.000Z'}]}
+    const state={day:'2026-11-21',competition:'PD',zone:'KST',result:kstResult}
+    const found=readVerifiedMatchState(state,'560643')
+    expect(found?.zone).toBe('KST')
+    expect(found?.competition).toBe('PD')
+    expect(found?.day).toBe('2026-11-21')
+    expect(readVerifiedMatchState({...state,day:'2026-11-20'},'560643')).toBeNull()
+    expect(readVerifiedMatchState({...state,zone:'Invalid'},'560643')).toBeNull()
+  })
+
 })

@@ -54,4 +54,22 @@ describe('local fixtures UI adapter',()=>{
     await expect(loadLocalFixtures('2026-11-21',undefined,'PAID' as 'PL')).rejects.toThrow('invalid_competition')
     expect(fetchMock).not.toHaveBeenCalled()
   })
+
+  it('requests exactly one KST calendar day through one same-origin call',async()=>{
+    const kstMatches=[
+      {...fixture,id:'1',kickoffUtc:'2026-11-20T15:00:00.000Z'},
+      {...fixture,id:'2',kickoffUtc:'2026-11-21T14:59:59.999Z'},
+    ]
+    const fetchMock=vi.fn().mockResolvedValue({ok:true,json:async()=>({...response,matches:kstMatches})})
+    vi.stubGlobal('fetch',fetchMock)
+    const result=await loadLocalFixtures('2026-11-21',undefined,'PD','KST')
+    expect(result.matches.map(m=>m.id)).toEqual(['1','2'])
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(fetchMock.mock.calls[0][0]).toBe('/api/fixtures?competition=PD&date=2026-11-21&tz=KST')
+    expect(fetchMock.mock.calls[0][1]).not.toHaveProperty('headers')
+  })
+  it('rejects an adjacent Korean date after successful network response',async()=>{
+    expect(()=>parseLocalFixtures({...response,matches:[{...fixture,kickoffUtc:'2026-11-21T15:00:00.000Z'}]},'2026-11-21','KST')).toThrow('invalid_response')
+  })
+
 })

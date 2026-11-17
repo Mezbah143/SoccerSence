@@ -1,4 +1,5 @@
 import {isLocalCompetition,type LocalCompetitionCode} from './localCompetitions'
+import {fixtureDay,validDay} from './dateNavigation'
 /**
  * Browser-facing, development-only local gateway client.
  * Never sends or reads provider credentials. Browser uses Vite's same-origin
@@ -31,7 +32,7 @@ const isDate = (value: unknown): value is string =>
 const validScore = (value: unknown) =>
   value === null || (typeof value === 'number' && Number.isSafeInteger(value) && value >= 0)
 
-export function parseLocalFixtures(value: unknown, requestedDate: string): LocalFixturesResult {
+export function parseLocalFixtures(value: unknown, requestedDate: string, zone:'UTC'|'KST'='UTC'): LocalFixturesResult {
   if (!isObject(value) || value.source !== 'football-data.org' ||
       value.freshness !== 'delayed' || !isDate(value.fetchedAt) ||
       value.attribution !== 'Football data provided by the Football-Data.org API' ||
@@ -40,7 +41,7 @@ export function parseLocalFixtures(value: unknown, requestedDate: string): Local
     if (!isObject(item) || typeof item.id !== 'string' ||
         typeof item.home !== 'string' || typeof item.away !== 'string' ||
         typeof item.competition !== 'string' || typeof item.status !== 'string' ||
-        !isDate(item.kickoffUtc) || item.kickoffUtc.slice(0,10) !== requestedDate ||
+        !isDate(item.kickoffUtc) || fixtureDay(item.kickoffUtc,zone) !== requestedDate ||
         !validScore(item.homeScore) || !validScore(item.awayScore)) throw new Error('invalid_response')
     return {
       id: item.id, home: item.home, away: item.away,
@@ -59,12 +60,10 @@ export function parseLocalFixtures(value: unknown, requestedDate: string): Local
     attribution:value.attribution as string,
   }
 }
-export async function loadLocalFixtures(date: string, signal?: AbortSignal, competition:LocalCompetitionCode='PL'): Promise<LocalFixturesResult> {
+export async function loadLocalFixtures(date: string, signal?: AbortSignal, competition:LocalCompetitionCode='PL', zone:'UTC'|'KST'='UTC'): Promise<LocalFixturesResult> {
   if(!isLocalCompetition(competition))throw new Error('invalid_competition')
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) ||
-      !Number.isFinite(Date.parse(date)) ||
-      new Date(date).toISOString().slice(0,10) !== date) throw new Error('invalid_date')
-  const response = await fetch('/api/fixtures?competition=' + competition + '&date=' + encodeURIComponent(date),{
+  if (!validDay(date)) throw new Error('invalid_date')
+  const response = await fetch('/api/fixtures?competition=' + competition + '&date=' + encodeURIComponent(date) + (zone==='KST'?'&tz=KST':''),{
     method:'GET',cache:'no-store',signal,
   })
   if (!response.ok) {
@@ -72,7 +71,7 @@ export async function loadLocalFixtures(date: string, signal?: AbortSignal, comp
     if (response.status === 503) throw new Error('gateway_disabled')
     throw new Error('gateway_unavailable')
   }
-  return parseLocalFixtures(await response.json(),date)
+  return parseLocalFixtures(await response.json(),date,zone)
 }
 export function utcKickoffLabel(value: string) {
   return new Intl.DateTimeFormat('en-GB', {
