@@ -36,3 +36,9 @@
 .real-detail-info dt{color:#97aca9}
 .real-detail-info dd{margin:0;text-align:right;color:#e4f2e9;overflow-wrap:anywhere}
 @media(max-width:760px){.real-detail{padding:28px 15px}.real-scoreboard{gap:8px}.real-side .crest{width:42px;height:42px;font-size:12px}.real-scoreboard>strong{font-size:30px}.real-detail-info{grid-template-columns:1fr}}
+
+/* Explicit local competition selector; all requests remain user initiated. */
+.competition-picker{display:flex;align-items:center;gap:10px;color:#b6c9c4;font-size:13px}
+.competition-picker select{background:#1c292d;border:1px solid #34474b;border-radius:9px;color:white;padding:11px;max-width:230px}
+.standings-actions{gap:14px;align-items:center}
+@media(max-width:760px){.standings-actions{flex-wrap:wrap}.competition-picker{justify-content:space-between;width:100%}.competition-picker select{flex:1}}
