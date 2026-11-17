@@ -18,7 +18,7 @@ function Home(){
       <button type="button" className={mode==='demo'?'selected':''} onClick={()=>setMode('demo')} aria-pressed={mode==='demo'}>Fictional demo</button>
       {import.meta.env.DEV&&<button type="button" className={mode==='local'?'selected':''} onClick={()=>setMode('local')} aria-pressed={mode==='local'}>Local real fixtures</button>}
     </div>
-    {mode==='local'&&import.meta.env.DEV?<LocalMatchCentre initialDate={restored?.day} initialResult={restored?.result}/>:<DemoHome/>}
+    {mode==='local'&&import.meta.env.DEV?<LocalMatchCentre initialDate={restored?.day} initialResult={restored?.result} initialCompetition={restored?.competition}/>:<DemoHome/>}
   </>
 }
 function Detail(){const {id}=useParams();const m=fixtures.find(x=>x.id===id);return <div className="detail"><Link to="/">‹ Back to fixtures</Link>{m?<div className="detail-card"><p className="kicker">{m.competition} · FICTIONAL DEMO</p><h1>{m.home} <span>{m.score?m.score.join(' : '):'vs'}</span> {m.away}</h1><p>{m.status==='finished'?'Full time':'Scheduled'} · {m.time}</p><p>No match statistics are provided in demo mode.</p></div>:<h1>Match not found</h1>}</div>}

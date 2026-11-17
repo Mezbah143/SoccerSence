@@ -2,10 +2,12 @@ import {useEffect,useRef,useState} from 'react'
 import {Link} from 'react-router-dom'
 import {CalendarDays,Clock3,Info} from 'lucide-react'
 import {loadLocalFixtures,utcKickoffLabel,type LocalFixturesResult} from './localFixtures'
+import {LOCAL_COMPETITIONS,type LocalCompetitionCode,localCompetitionName} from './localCompetitions'
 
 const utcToday = () => new Date().toISOString().slice(0,10)
-export function LocalMatchCentre({initialDate,initialResult}:{initialDate?:string;initialResult?:LocalFixturesResult|null}) {
+export function LocalMatchCentre({initialDate,initialResult,initialCompetition='PL'}:{initialDate?:string;initialResult?:LocalFixturesResult|null;initialCompetition?:LocalCompetitionCode}) {
   const [date,setDate]=useState(initialDate??utcToday)
+  const [competition,setCompetition]=useState<LocalCompetitionCode>(initialCompetition)
   const [result,setResult]=useState<LocalFixturesResult|null>(initialResult??null)
   const [error,setError]=useState('')
   const [loading,setLoading]=useState(false)
@@ -18,6 +20,13 @@ export function LocalMatchCentre({initialDate,initialResult}:{initialDate?:strin
     setError('')
     setLoading(false)
   }
+  const updateCompetition=(next:LocalCompetitionCode)=>{
+    controller.current?.abort()
+    setCompetition(next)
+    setResult(null)
+    setError('')
+    setLoading(false)
+  }
   const request = async()=>{
     controller.current?.abort()
     const abort=new AbortController()
@@ -26,7 +35,7 @@ export function LocalMatchCentre({initialDate,initialResult}:{initialDate?:strin
     setError('')
     setLoading(true)
     try{
-      const data=await loadLocalFixtures(date,abort.signal)
+      const data=await loadLocalFixtures(date,abort.signal,competition)
       if(!abort.signal.aborted)setResult(data)
     }catch(cause){
       if(!abort.signal.aborted)setError(cause instanceof Error&&cause.message==='rate_limited'
@@ -39,9 +48,10 @@ export function LocalMatchCentre({initialDate,initialResult}:{initialDate?:strin
     }
   }
   return <section aria-label="Local real fixtures">
-    <div className="section-title"><div><p className="kicker">LOCAL DATA EXPERIMENT</p><h2>Premier League fixtures</h2></div><span className="pill">Delayed scores</span></div>
+    <div className="section-title"><div><p className="kicker">LOCAL DATA EXPERIMENT</p><h2>{localCompetitionName(competition)} fixtures</h2></div><span className="pill">Delayed scores</span></div>
     <p className="mode-hint"><Info size={16} aria-hidden="true"/> Local development only. Dates filter by <strong>UTC day</strong>; kickoff times show in Korea time (KST). Real data is fetched only when you press the button.</p>
     <div className="filters">
+      <label>Competition <select aria-label="Real fixtures competition" value={competition} onChange={event=>updateCompetition(event.target.value as LocalCompetitionCode)}>{LOCAL_COMPETITIONS.map(item=><option key={item.code} value={item.code}>{item.name}</option>)}</select></label>
       <label>UTC date <input aria-label="UTC fixture date" type="date" value={date} onChange={event=>updateDate(event.target.value)}/></label>
       <button className="load-button" type="button" disabled={loading||!date} onClick={request}>{loading?'Loading…':'Load real fixtures'}</button>
     </div>
@@ -53,7 +63,7 @@ export function LocalMatchCentre({initialDate,initialResult}:{initialDate?:strin
     </div>}
     {result&&result.matches.length===0&&<div className="empty"><CalendarDays size={32} aria-hidden="true"/><h3>No fixtures for this UTC date</h3><p>Try another day. No fictional matches are displayed in this mode.</p></div>}
     {result&&result.matches.length>0&&<div className="match-grid">
-      {result.matches.map(match=><Link to={'/real-match/'+match.id} state={{day:date,result}} className="match-card" key={match.id} aria-label={'Match details: '+match.home+' versus '+match.away}>
+      {result.matches.map(match=><Link to={'/real-match/'+match.id} state={{day:date,result,competition}} className="match-card" key={match.id} aria-label={'Match details: '+match.home+' versus '+match.away}>
         <div className="match-meta"><span>● {match.competition}</span><span className="pill">{match.status==='FINISHED'?'Full time':match.status==='TIMED'?'Scheduled':match.status}</span></div>
         <div className="team"><span><b className="crest" aria-hidden="true">{match.home.slice(0,2).toUpperCase()}</b>{match.home}</span><strong>{match.homeScore??'–'}</strong></div>
         <div className="team"><span><b className="crest purple" aria-hidden="true">{match.away.slice(0,2).toUpperCase()}</b>{match.away}</span><strong>{match.awayScore??'–'}</strong></div>

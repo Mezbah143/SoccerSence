@@ -138,4 +138,32 @@ describe('local provider gateway', () => {
     expect(result.status).toBe(502)
   })
 
+  it.each([
+    ['PD','/competitions/PD/matches?dateFrom=2026-11-15&dateTo=2026-11-16'],
+    ['BL1','/competitions/BL1/matches?dateFrom=2026-11-15&dateTo=2026-11-16'],
+    ['SA','/competitions/SA/matches?dateFrom=2026-11-15&dateTo=2026-11-16'],
+    ['FL1','/competitions/FL1/matches?dateFrom=2026-11-15&dateTo=2026-11-16'],
+    ['DED','/competitions/DED/matches?dateFrom=2026-11-15&dateTo=2026-11-16'],
+  ])('uses explicit Free competition code %s in fixture upstream route',async(code,path)=>{
+    const fetcher=vi.fn<typeof fetch>().mockResolvedValue(empty())
+    const response=await createGateway(config,fetcher)('/api/fixtures?competition='+code+'&date=2026-11-15')
+    expect(response.status).toBe(200)
+    expect(fetcher.mock.calls[0][0]).toBe('https://api.football-data.org/v4'+path)
+  })
+  it('routes standings using allowlisted code while respecting shared request budget',async()=>{
+    const fetcher=vi.fn<typeof fetch>().mockImplementation(async()=>json({competition:{name:'Fictional League'},standings:[]}))
+    const gateway=createGateway(config,fetcher,()=>0)
+    for(const code of ['PL','PD','BL1','SA','FL1','DED']){
+      expect((await gateway('/api/standings?competition='+code)).status).toBe(200)
+    }
+    expect((await gateway('/api/standings?competition=PL')).status).toBe(429)
+    expect(fetcher).toHaveBeenCalledTimes(6)
+    expect(fetcher.mock.calls[1][0]).toBe('https://api.football-data.org/v4/competitions/PD/standings')
+  })
+  it.each(['UNKNOWN','CL-PAID','../../key','pl','', 'WC%2Fextra'])('rejects unapproved competition %s before network call',async code=>{
+    const fetcher=vi.fn<typeof fetch>()
+    const response=await createGateway(config,fetcher)('/api/fixtures?competition='+code+'&date=2026-11-15')
+    expect(response.status).toBe(400)
+    expect(fetcher).not.toHaveBeenCalled()
+  })
 })

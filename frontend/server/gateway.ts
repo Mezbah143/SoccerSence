@@ -1,5 +1,6 @@
 import { normalizeFootballDataList } from '../src/providers/footballData.js'
 import { normalizeFootballDataStandings } from '../src/providers/standings.js'
+import { isLocalCompetition } from '../src/localCompetitions.js'
 
 const UPSTREAM = 'https://api.football-data.org/v4'
 const ATTRIBUTION = 'Football data provided by the Football-Data.org API'
@@ -12,9 +13,10 @@ function parseRoute(path: string): { upstream: string; kind: 'fixtures' | 'stand
   if (!path.startsWith('/api/') || path.includes('#')) return null
   const url = new URL(path, 'http://127.0.0.1:8787')
   const keys = [...url.searchParams.keys()]
-  if (new Set(keys).size !== keys.length || url.searchParams.get('competition') !== 'PL') return null
+  if (new Set(keys).size !== keys.length || !isLocalCompetition(url.searchParams.get('competition'))) return null
+  const competition=url.searchParams.get('competition')!
   if (url.pathname === '/api/standings' && keys.length === 1) {
-    return { upstream: '/competitions/PL/standings', kind: 'standings' }
+    return { upstream: `/competitions/${competition}/standings`, kind: 'standings' }
   }
   const date = url.searchParams.get('date') ?? ''
   if (url.pathname !== '/api/fixtures' || keys.length !== 2 || !keys.includes('date') ||
@@ -22,7 +24,7 @@ function parseRoute(path: string): { upstream: string; kind: 'fixtures' | 'stand
   // v4 dateTo is exclusive. Limit every request to one UTC day and one competition.
   const next = new Date(Date.parse(date) + 86_400_000).toISOString().split('T')[0]
   if (!/^\d{4}-\d{2}-\d{2}$/.test(next)) return null
-  return {upstream: `/competitions/PL/matches?dateFrom=${date}&dateTo=${next}`, kind: 'fixtures', date}
+  return {upstream: `/competitions/${competition}/matches?dateFrom=${date}&dateTo=${next}`, kind: 'fixtures', date}
 }
 
 async function boundedJson(response: Response): Promise<unknown> {
