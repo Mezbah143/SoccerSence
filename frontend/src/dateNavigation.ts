@@ -8,7 +8,9 @@ export function shiftDay(day: string, days: number): string {
   if (!validDay(day)) throw new Error('invalid_date')
   const shifted = new Date(Date.parse(day) + days * 86_400_000)
   if (!Number.isFinite(shifted.valueOf())) throw new Error('invalid_date')
-  return shifted.toISOString().slice(0,10)
+  const output=shifted.toISOString().slice(0,10)
+  if (!validDay(output)) throw new Error('invalid_date')
+  return output
 }
 export function kstDayFromUtc(iso: string): string {
   const time = Date.parse(iso)
