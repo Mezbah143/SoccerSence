@@ -166,4 +166,47 @@ describe('local provider gateway', () => {
     expect(response.status).toBe(400)
     expect(fetcher).not.toHaveBeenCalled()
   })
+
+  it('selects exactly one KST day in one upstream call across midnight',async()=>{
+    const matches=[
+      {...match,id:1,utcDate:'2026-11-20T14:59:59.999Z'},
+      {...match,id:2,utcDate:'2026-11-20T15:00:00.000Z'},
+      {...match,id:3,utcDate:'2026-11-21T14:59:59.999Z'},
+      {...match,id:4,utcDate:'2026-11-21T15:00:00.000Z'},
+      {...match,id:5,utcDate:'2026-11-22T01:00:00.000Z'},
+    ]
+    const fetcher=vi.fn<typeof fetch>().mockResolvedValue(json({matches}))
+    const result=await createGateway(config,fetcher)('/api/fixtures?competition=PD&date=2026-11-21&tz=KST')
+    expect(result.status).toBe(200)
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    expect(fetcher.mock.calls[0][0]).toBe('https://api.football-data.org/v4/competitions/PD/matches?dateFrom=2026-11-20&dateTo=2026-11-22')
+    expect((result.body.matches as {id:string}[]).map(x=>x.id)).toEqual(['2','3'])
+    expect(JSON.stringify(result)).not.toContain(config.token)
+  })
+  it.each([
+    '/api/fixtures?competition=PD&date=2026-11-21&tz=UTC',
+    '/api/fixtures?competition=PD&date=2026-11-21&tz=Asia/Seoul',
+    '/api/fixtures?competition=PD&date=2026-11-21&tz=KST&extra=1',
+    '/api/fixtures?competition=PD&date=2026-11-21&tz=KST&tz=KST',
+  ])('rejects unsupported KST parameters without provider calls: %s',async path=>{
+    const fetcher=vi.fn<typeof fetch>()
+    expect((await createGateway(config,fetcher)(path)).status).toBe(400)
+    expect(fetcher).not.toHaveBeenCalled()
+  })
+  it('shares the same rate budget between KST and original UTC requests',async()=>{
+    const fetcher=vi.fn<typeof fetch>().mockImplementation(async()=>empty())
+    const gateway=createGateway(config,fetcher,()=>0)
+    for(let i=0;i<3;i++){
+      expect((await gateway('/api/fixtures?competition=PL&date=2026-11-21&tz=KST')).status).toBe(200)
+      expect((await gateway('/api/standings?competition=PL')).status).toBe(200)
+    }
+    expect((await gateway(route)).status).toBe(429)
+    expect(fetcher).toHaveBeenCalledTimes(6)
+  })
+  it('does not return partially valid KST day when provider response includes malformed records',async()=>{
+    const fetcher=vi.fn<typeof fetch>().mockResolvedValue(json({matches:[{...match,utcDate:'2026-11-20T15:00:00Z'},{utcDate:'bad'}]}))
+    const result=await createGateway(config,fetcher)('/api/fixtures?competition=PL&date=2026-11-21&tz=KST')
+    expect(result.status).toBe(502)
+  })
+
 })
