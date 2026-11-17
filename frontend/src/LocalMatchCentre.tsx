@@ -50,16 +50,16 @@ export function LocalMatchCentre({initialDate,initialResult,initialCompetition='
   }
   return <section aria-label="Local real fixtures">
     <div className="section-title"><div><p className="kicker">LOCAL DATA EXPERIMENT</p><h2>{localCompetitionName(competition)} fixtures</h2></div><span className="pill">Delayed scores</span></div>
-    <p className="mode-hint"><Info size={16} aria-hidden="true"/> Local development only. The selected day is a <strong>Korean calendar day (KST)</strong>; kickoff times show in Korea time. Results include both sides of UTC midnight. Real data is fetched only when you press the button.</p>
-    <div className="filters">
-      <label>Competition <select aria-label="Real fixtures competition" value={competition} onChange={event=>updateCompetition(event.target.value as LocalCompetitionCode)}>{LOCAL_COMPETITIONS.map(item=><option key={item.code} value={item.code}>{item.name}</option>)}</select></label>
+    <p className="mode-hint"><Info size={16} aria-hidden="true"/><span>Local development only. Dates follow the <strong>Korean calendar (KST)</strong>, including matches around UTC midnight. Kickoff times are in KST. Data loads only when you press the button.</span></p>
+    <div className="filters real-fixture-filters">
+      <label className="fixture-league-field">Competition <select aria-label="Real fixtures competition" value={competition} onChange={event=>updateCompetition(event.target.value as LocalCompetitionCode)}>{LOCAL_COMPETITIONS.map(item=><option key={item.code} value={item.code}>{item.name}</option>)}</select></label>
       <div className="kst-date-navigation" role="group" aria-label="Match date navigation">
         <button type="button" aria-label="Previous KST day" onClick={()=>updateDate(shiftDay(date,-1))} disabled={!validDay(date)}> <ChevronLeft size={18} aria-hidden="true"/> </button>
         <button type="button" onClick={()=>updateDate(todayInKst())}>Today</button>
         <button type="button" aria-label="Next KST day" onClick={()=>updateDate(shiftDay(date,1))} disabled={!validDay(date)}> <ChevronRight size={18} aria-hidden="true"/> </button>
         <label>KST date <input aria-label="Korean match date" type="date" value={date} onChange={event=>updateDate(event.target.value)}/></label>
       </div>
-      <button className="load-button" type="button" disabled={loading||!validDay(date)} onClick={request}>{loading?'Loading…':'Load real fixtures'}</button>
+      <button className="load-button fixture-load-button" type="button" disabled={loading||!validDay(date)} onClick={request}>{loading?'Loading…':'Load real fixtures'}</button>
     </div>
     {loading&&<div className="empty" role="status">Loading delayed fixtures from your local gateway…</div>}
     {error&&<div className="empty" role="alert"><h3>Fixtures unavailable</h3><p>{error}</p><p>No demo results have been substituted.</p></div>}
@@ -69,7 +69,7 @@ export function LocalMatchCentre({initialDate,initialResult,initialCompetition='
     </div>}
     {result&&result.matches.length===0&&<div className="empty"><CalendarDays size={32} aria-hidden="true"/><h3>No fixtures for this Korean date</h3><p>Try another day. No fictional matches are displayed in this mode.</p></div>}
     {result&&result.matches.length>0&&<div className="match-grid">
-      {result.matches.map(match=><Link to={'/real-match/'+match.id} state={{day:date,result,competition,zone}} className="match-card" key={match.id} aria-label={'Match details: '+match.home+' versus '+match.away}>
+      {result.matches.map(match=><Link to={'/real-match/'+match.id} state={{day:date,result,competition,zone}} className="match-card real-match-card" key={match.id} aria-label={'Match details: '+match.home+' versus '+match.away}>
         <div className="match-meta"><span>● {match.competition}</span><span className="pill">{match.status==='FINISHED'?'Full time':match.status==='TIMED'?'Scheduled':match.status}</span></div>
         <div className="team"><span><b className="crest" aria-hidden="true">{match.home.slice(0,2).toUpperCase()}</b>{match.home}</span><strong>{match.homeScore??'–'}</strong></div>
         <div className="team"><span><b className="crest purple" aria-hidden="true">{match.away.slice(0,2).toUpperCase()}</b>{match.away}</span><strong>{match.awayScore??'–'}</strong></div>

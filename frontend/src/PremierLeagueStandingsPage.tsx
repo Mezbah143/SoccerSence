@@ -44,7 +44,7 @@ export function LocalStandings() {
       <div><p className="kicker">LOCAL DATA EXPERIMENT</p><h2>{localCompetitionName(competition)} standings</h2></div>
       <span className="pill">Delayed standings</span>
     </div>
-    <p className="mode-hint"><Info size={16} aria-hidden="true"/> Local testing only. Tables retain the provider's official positions and points, including any deductions. No automatic polling.</p>
+    <p className="mode-hint"><Info size={16} aria-hidden="true"/><span>Local testing only. Tables retain the provider’s positions and points, including deductions. No automatic polling.</span></p>
     <div className="standings-actions"><label className="competition-picker">Competition <select aria-label="Standings competition" value={competition} onChange={event=>updateCompetition(event.target.value as LocalCompetitionCode)}>{LOCAL_COMPETITIONS.map(item=><option key={item.code} value={item.code}>{item.name}</option>)}</select></label><button type="button" className="load-button" disabled={loading} onClick={request}>{loading?'Loading…':'Load real standings'}</button></div>
     {loading&&<div className="empty" role="status">Loading delayed competition standings…</div>}
     {error&&<div className="empty" role="alert"><h3>Standings unavailable</h3><p>{error}</p><p>No invented table has been substituted.</p></div>}
