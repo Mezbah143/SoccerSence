@@ -151,7 +151,7 @@ describe('local provider gateway', () => {
     expect(fetcher.mock.calls[0][0]).toBe('https://api.football-data.org/v4'+path)
   })
   it('routes standings using allowlisted code while respecting shared request budget',async()=>{
-    const fetcher=vi.fn<typeof fetch>().mockResolvedValue(json({competition:{name:'Fictional League'},standings:[]}))
+    const fetcher=vi.fn<typeof fetch>().mockImplementation(async()=>json({competition:{name:'Fictional League'},standings:[]}))
     const gateway=createGateway(config,fetcher,()=>0)
     for(const code of ['PL','PD','BL1','SA','FL1','DED']){
       expect((await gateway('/api/standings?competition='+code)).status).toBe(200)
