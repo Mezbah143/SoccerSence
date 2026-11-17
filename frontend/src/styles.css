@@ -52,3 +52,49 @@
 .kst-date-navigation input[type=date]{min-width:145px}
 .kst-date-navigation button:focus-visible,.kst-date-navigation input:focus-visible{outline:3px solid #8de9b0;outline-offset:3px}
 @media(max-width:760px){.kst-date-navigation{width:100%;justify-content:flex-start}.kst-date-navigation label{width:100%;justify-content:space-between}.kst-date-navigation input[type=date]{flex:1;max-width:250px}}
+
+/* M4: match-centre responsive polish. No gateway or data behaviour changes. */
+.mode-hint{max-width:100%;align-items:flex-start}
+.mode-hint>span{display:block;min-width:0;flex:1;overflow-wrap:break-word}
+.real-fixture-filters{display:grid;grid-template-columns:minmax(145px,190px) minmax(0,1fr) auto;align-items:end;justify-content:initial;gap:14px;margin:22px 0 24px}
+.real-fixture-filters>.fixture-league-field{display:flex;flex-direction:column;align-items:stretch;gap:7px;min-width:0;white-space:nowrap}
+.real-fixture-filters>.fixture-league-field select{width:100%;max-width:none;height:44px}
+.real-fixture-filters>.kst-date-navigation{min-width:0;gap:7px}
+.real-fixture-filters>.kst-date-navigation>button{height:44px;min-width:44px}
+.real-fixture-filters>.kst-date-navigation label{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:7px;font-size:12px;min-width:160px}
+.real-fixture-filters>.kst-date-navigation input[type=date]{width:100%;min-width:145px;height:44px;font:inherit}
+.real-fixture-filters>.fixture-load-button{height:44px;white-space:nowrap}
+.real-match-card{display:flex;flex-direction:column;min-width:0;min-height:250px}
+.real-match-card .team{min-width:0;gap:12px;align-items:flex-start}
+.real-match-card .team>span{min-width:0;flex:1;line-height:1.45;overflow-wrap:anywhere}
+.real-match-card .team strong{flex-shrink:0;line-height:1.4}
+.real-match-card .match-meta{gap:12px;align-items:flex-start}
+.real-match-card .match-meta>span:first-child{min-width:0;overflow-wrap:anywhere}
+.real-match-card .match-meta .pill{flex-shrink:0}
+.real-match-card .match-bottom{margin-top:auto;flex-wrap:wrap;row-gap:8px}
+.real-match-card .match-bottom span{white-space:nowrap}
+@media(min-width:761px) and (max-width:1000px){
+  .real-fixture-filters{grid-template-columns:minmax(145px,210px) minmax(0,1fr)}
+  .real-fixture-filters>.fixture-load-button{grid-column:1/-1;width:100%}
+}
+@media(max-width:760px){
+  .real-fixture-filters{display:flex;flex-direction:column;align-items:stretch;gap:14px}
+  .real-fixture-filters>.fixture-league-field{width:100%;gap:8px;flex-wrap:nowrap}
+  .real-fixture-filters>.kst-date-navigation{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%}
+  .real-fixture-filters>.kst-date-navigation>button{width:100%;height:44px}
+  .real-fixture-filters>.kst-date-navigation label{grid-column:1/-1;width:100%;display:flex;flex-direction:column;align-items:stretch;gap:8px}
+  .real-fixture-filters>.kst-date-navigation input[type=date]{max-width:none;width:100%;min-width:0}
+  .real-fixture-filters>.fixture-load-button{width:100%;height:48px}
+  .real-match-card{min-height:230px}
+  .real-match-card .match-bottom span{margin-left:auto}
+  .section-title{gap:12px;align-items:flex-start}
+  .section-title .pill{flex-shrink:0}
+  .mode-hint{line-height:1.55}
+  .source-panel{overflow-wrap:anywhere}
+}
+@media(max-width:380px){
+  .section-title{flex-wrap:wrap}
+  .real-match-card{padding:16px}
+  .real-match-card .team{font-size:13px}
+  .real-match-card .match-bottom span{margin-left:0;width:100%}
+}
