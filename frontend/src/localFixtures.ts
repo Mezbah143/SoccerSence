@@ -1,3 +1,4 @@
+import {isLocalCompetition,type LocalCompetitionCode} from './localCompetitions'
 /**
  * Browser-facing, development-only local gateway client.
  * Never sends or reads provider credentials. Browser uses Vite's same-origin
@@ -58,11 +59,12 @@ export function parseLocalFixtures(value: unknown, requestedDate: string): Local
     attribution:value.attribution as string,
   }
 }
-export async function loadLocalFixtures(date: string, signal?: AbortSignal): Promise<LocalFixturesResult> {
+export async function loadLocalFixtures(date: string, signal?: AbortSignal, competition:LocalCompetitionCode='PL'): Promise<LocalFixturesResult> {
+  if(!isLocalCompetition(competition))throw new Error('invalid_competition')
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) ||
       !Number.isFinite(Date.parse(date)) ||
       new Date(date).toISOString().slice(0,10) !== date) throw new Error('invalid_date')
-  const response = await fetch('/api/fixtures?competition=PL&date=' + encodeURIComponent(date),{
+  const response = await fetch('/api/fixtures?competition=' + competition + '&date=' + encodeURIComponent(date),{
     method:'GET',cache:'no-store',signal,
   })
   if (!response.ok) {
