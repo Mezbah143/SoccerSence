@@ -194,7 +194,10 @@ describe('local provider gateway', () => {
     expect(fetcher).not.toHaveBeenCalled()
   })
   it('shares the same rate budget between KST and original UTC requests',async()=>{
-    const fetcher=vi.fn<typeof fetch>().mockImplementation(async()=>empty())
+    const fetcher=vi.fn<typeof fetch>().mockImplementation(async(url)=>
+      String(url).includes('/standings')
+        ? json({competition:{name:'Fictional League'},standings:[]})
+        : empty())
     const gateway=createGateway(config,fetcher,()=>0)
     for(let i=0;i<3;i++){
       expect((await gateway('/api/fixtures?competition=PL&date=2026-11-21&tz=KST')).status).toBe(200)
