@@ -1,3 +1,4 @@
+import {isLocalCompetition,type LocalCompetitionCode} from './localCompetitions'
 /**
  * Local-development browser client for normalized standings.
  * All provider access and the private token stay behind the loopback gateway.
@@ -75,8 +76,9 @@ export function parseLocalStandings(data: unknown): LocalStandingsResult {
   }
 }
 
-export async function loadLocalStandings(signal?: AbortSignal): Promise<LocalStandingsResult> {
-  const response = await fetch('/api/standings?competition=PL',{
+export async function loadLocalStandings(signal?: AbortSignal, competition:LocalCompetitionCode='PL'): Promise<LocalStandingsResult> {
+  if(!isLocalCompetition(competition))throw new Error('invalid_competition')
+  const response = await fetch('/api/standings?competition='+competition,{
     method:'GET',cache:'no-store',signal,
   })
   if (!response.ok) {
