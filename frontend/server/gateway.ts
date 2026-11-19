@@ -108,7 +108,8 @@ export function createGateway(config: GatewayConfig, fetcher: typeof fetch = fet
           blockedOptional.add(route.kind)
           return error(403,'team_endpoint_denied')
         }
-        if (response.status === 403 && route.kind==='all-fixtures') return error(503,'aggregate_unavailable')
+        if (route.kind==='all-fixtures' && response.status === 400) return error(422,'aggregate_filter_rejected')
+        if (route.kind==='all-fixtures' && response.status === 403) return error(503,'aggregate_unavailable')
         if (response.status === 401 || response.status === 403) {
           accessDenied = true
           return error(response.status, response.status === 401 ? 'provider_unauthorized' : 'provider_forbidden')
@@ -147,7 +148,9 @@ export function createGateway(config: GatewayConfig, fetcher: typeof fetch = fet
         for (let i=0;i<payload.matches.length;i++) {
           const raw=payload.matches[i] as {competition?:{id?:unknown}} | null
           const code=codeFromProviderId(raw?.competition?.id)
-          if(!code)return error(502,'invalid_provider_response')
+          // A provider-wide response may contain other competitions; never mislabel
+          // them as one of our six allowlisted leagues.
+          if(!code)continue
           if(fixtureDay(matches[i].kickoffUtc,'KST')===route.date)grouped[code].push(matches[i])
         }
         return {status:200,body:{...meta,leagues:grouped}}
@@ -161,7 +164,7 @@ export function createGateway(config: GatewayConfig, fetcher: typeof fetch = fet
       return {status: 200, body: {...meta, matches: dailyMatches}}
     } catch {
       // Never echo upstream bodies, thrown errors, headers or credentials to users/logs.
-      return error(502, 'provider_unavailable')
+      return error(502, route.kind==='all-fixtures'?'aggregate_response_unavailable':'provider_unavailable')
     } finally { busy = false }
   }
 }
