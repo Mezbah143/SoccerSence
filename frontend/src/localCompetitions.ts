@@ -6,6 +6,9 @@ export const LOCAL_COMPETITIONS = [
   {code:'SA',name:'Serie A'},
   {code:'FL1',name:'Ligue 1'},
   {code:'DED',name:'Eredivisie'},
+  {code:'CL',name:'UEFA Champions League'},
+  {code:'WC',name:'FIFA World Cup'},
+  {code:'EC',name:'UEFA European Championship'},
 ] as const
 export type LocalCompetitionCode = typeof LOCAL_COMPETITIONS[number]['code']
 export function isLocalCompetition(value:unknown):value is LocalCompetitionCode {
@@ -18,8 +21,12 @@ export function localCompetitionName(code:LocalCompetitionCode):string {
 /** Stable football-data.org competition identifiers, server allowlist only. */
 export const LOCAL_COMPETITION_IDS: Record<LocalCompetitionCode,number> = {
   PL:2021, PD:2014, BL1:2002, SA:2019, FL1:2015, DED:2003,
+  CL:2001, WC:2000, EC:2018,
 }
 export function codeFromProviderId(id:unknown):LocalCompetitionCode|null {
   const found=LOCAL_COMPETITIONS.find(c=>LOCAL_COMPETITION_IDS[c.code]===id)
   return found?.code??null
 }
+
+/** Separate international national-team tournaments from club competitions. */
+export const isInternationalCompetition=(code:LocalCompetitionCode)=>code==='WC'||code==='EC'
