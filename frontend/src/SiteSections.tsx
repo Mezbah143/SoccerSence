@@ -3,7 +3,7 @@ import {Link,useLocation} from 'react-router-dom'
 import {CalendarDays,Goal,Heart,Menu,Newspaper,Search,Settings2,Trophy} from 'lucide-react'
 import {LOCAL_COMPETITIONS,localCompetitionName} from './localCompetitions'
 import {isPrimarySectionActive} from './primaryNavigation'
-import {clearFavorites,DEFAULT_PREFERENCES,favoriteKey,savePreferences,toggleFavorite,useFavorites,usePreferences} from './localPreferences'
+import {clearFavorites,DEFAULT_PREFERENCES,favoriteKey,savePreferences,toggleFavorite,useFavorites,usePreferences,type Favorite} from './localPreferences'
 
 const sections=[
   {to:'/',label:'Matches',Icon:CalendarDays},
@@ -90,7 +90,7 @@ export function SearchPage(){
   const favorites=useFavorites()
   const normalized=query.trim().toLocaleLowerCase()
   const leagues=LOCAL_COMPETITIONS.filter(item=>item.name.toLocaleLowerCase().includes(normalized)||item.code.toLowerCase().includes(normalized))
-  const clubs=favorites.filter(item=>item.kind==='team'&&item.name.toLocaleLowerCase().includes(normalized))
+  const clubs=favorites.filter((item):item is Extract<Favorite,{kind:'team'}>=>item.kind==='team'&&item.name.toLocaleLowerCase().includes(normalized))
   return <section aria-label="Local search">
     <PageHeading eyebrow="QUICK DISCOVERY" title="Search" description="Find supported leagues and clubs you've saved locally. Search never contacts football-data.org or triggers a paid API."/>
     <label className="search-field"><Search size={20} aria-hidden="true"/><span className="sr-only">Search leagues and favorites</span><input autoFocus type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search leagues or saved clubs…" maxLength={80}/></label>
