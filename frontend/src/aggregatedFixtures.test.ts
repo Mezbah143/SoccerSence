@@ -11,7 +11,7 @@ const body={source:'football-data.org',freshness:'delayed',fetchedAt:'2026-11-19
 beforeEach(()=>{clearAggregateRequestCache();clearMatchDayCache()})
 afterEach(()=>vi.unstubAllGlobals())
 describe('M12 consolidated automatic fixtures',()=>{
-  it('validates all six groups with exact KST dates',()=>{
+  it('validates all allowlisted competition groups with exact KST dates',()=>{
     const result=parseAggregatedDay(body,day)
     expect(result.PL?.result?.matches[0].id).toBe('1')
     expect(result.PD?.result?.matches).toEqual([])
@@ -30,7 +30,7 @@ describe('M12 consolidated automatic fixtures',()=>{
     expect(fetcher).toHaveBeenCalledTimes(1)
     expect(fetcher).toHaveBeenCalledWith('/api/all-fixtures?date='+day+'&tz=KST',{method:'GET',cache:'no-store'})
     expect(a.PL?.result).toEqual(b.PL?.result)
-    expect(Object.keys(getCachedDay(day))).toHaveLength(6)
+    expect(Object.keys(getCachedDay(day))).toHaveLength(LOCAL_COMPETITIONS.length)
     await loadAggregatedDay(day,signal)
     expect(fetcher).toHaveBeenCalledTimes(1)
   })
