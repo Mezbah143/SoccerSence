@@ -2,7 +2,7 @@ import {useEffect,useMemo,useRef,useState} from 'react'
 import {Link,useLocation} from 'react-router-dom'
 import {CalendarDays,ChevronLeft,ChevronRight,Clock3,Info,Star,Trophy} from 'lucide-react'
 import {shiftDay,todayInKst,validDay} from './dateNavigation'
-import {LOCAL_COMPETITIONS,isLocalCompetition} from './localCompetitions'
+import {LOCAL_COMPETITIONS,isLocalCompetition,isInternationalCompetition} from './localCompetitions'
 import {loadLocalFixtures,utcKickoffLabel} from './localFixtures'
 import {presentMatch} from './matchPresentation'
 import {getCachedDay,loadMatchDay,orderedCompetitions,storeMatchDayResult,type DayResults} from './multiLeagueFixtures'
@@ -22,7 +22,7 @@ export function AllLeaguesMatchCentre(){
   const [autoError,setAutoError]=useState('')
   const [progress,setProgress]=useState<{done:number;total:number}>({done:0,total:LOCAL_COMPETITIONS.length})
   const abort=useRef<AbortController|null>(null)
-  const order=useMemo(()=>orderedCompetitions(favoriteItems,isLocalCompetition(shortcut)?shortcut:undefined),[favoriteItems,shortcut])
+  const order=useMemo(()=>orderedCompetitions(favoriteItems,isLocalCompetition(shortcut)?shortcut:undefined).sort((a,b)=>Number(isInternationalCompetition(a.code))-Number(isInternationalCompetition(b.code))),[favoriteItems,shortcut])
   useEffect(()=>{
     if(restored&&restored.zone==='KST'){
       storeMatchDayResult(restored.day,restored.competition,restored.result)
@@ -78,8 +78,8 @@ export function AllLeaguesMatchCentre(){
   const dateOptions=validDay(day)?[-2,-1,0,1,2].map(offset=>shiftDay(day,offset)):[]
   return <section className="m11-centre" aria-label="All leagues fixtures">
     <div className="m11-heading">
-      <div><p className="kicker">ALL-LEAGUES MATCH CENTRE</p><h1>Matches & fixtures</h1><p>Six competitions · Korean calendar (KST) · Delayed scores</p></div>
-      <span className="pill">{ready} / 6 leagues loaded · {totalMatches} fixtures</span>
+      <div><p className="kicker">ALL-LEAGUES MATCH CENTRE</p><h1>Matches & fixtures</h1><p>{LOCAL_COMPETITIONS.length} competitions · Korean calendar (KST) · Delayed scores</p></div>
+      <span className="pill">{ready} / {LOCAL_COMPETITIONS.length} competitions loaded · {totalMatches} fixtures</span>
     </div>
     <div className="m11-date-strip" role="group" aria-label="KST fixture date">
       <button type="button" className="m11-date-arrow" disabled={!validDay(day)} onClick={()=>changeDay(shiftDay(day,-1))} aria-label="Previous Korean day"><ChevronLeft size={19}/></button>
@@ -95,15 +95,19 @@ export function AllLeaguesMatchCentre(){
       <p><Info size={16} aria-hidden="true"/><span>Matches load automatically with one private, quota-limited multi-league request per selected KST date. Previously loaded days reuse memory. No polling, automatic retries or public real-data access.</span></p>
       <button className="load-button" type="button" disabled={busy||autoLoading||!validDay(day)||ready===6} onClick={loadAll}>{busy?`Loading leagues… ${progress.done}/${progress.total}`:ready===6?'All leagues loaded':ready>0?'Load remaining fixtures':'Load all fixtures'}</button>
     </div>
-    {autoLoading&&<p className="m11-progress" role="status">Loading all six leagues automatically through one consolidated gateway request…</p>}
+    {autoLoading&&<p className="m11-progress" role="status">Loading supported club and international competitions automatically through one consolidated gateway request…</p>}
     {autoError&&<div className="m11-league-notice m11-error" role="alert">{autoError}</div>}
     {busy&&<p className="m11-progress" role="status">Loading {progress.done} of {progress.total} competitions. Sequential only; no retries or refresh polling.</p>}
     <div className="m11-league-sections">
-      {order.map(league=>{
+      {order.map((league,index)=>{
         const item=responses[league.code]
         const result=item?.result
         const isFavorite=favoriteItems.some(f=>f.kind==='league'&&f.id===league.code)
-        return <section className="m11-league" key={league.code} aria-label={league.name+' fixtures'}>
+        const international=isInternationalCompetition(league.code)
+        return <div className="m13-competition-wrap" key={league.code}>
+          {(index===0 || (international&&!isInternationalCompetition(order[index-1].code)))&&
+            <div className="m13-group-heading"><h2>{international?'International tournaments':'Club competitions'}</h2><p>{international?'National teams · World Cup and European Championship':'Domestic leagues and UEFA Champions League'}</p></div>}
+          <section className="m11-league" aria-label={league.name+' fixtures'}>
           <div className="m11-league-heading">
             <div><Trophy size={21} aria-hidden="true"/><h2>{league.name}</h2>{isFavorite&&<Star size={15} aria-label="Saved league" className="m11-saved-star"/>}</div>
             <Link to={'/standings?competition='+league.code} aria-label={'View '+league.name+' standings'}>Standings <ChevronRight size={16} aria-hidden="true"/></Link>
@@ -122,7 +126,7 @@ export function AllLeaguesMatchCentre(){
               <span className={'m11-fixture-status m6-status-'+presentMatch(match).tone}>{presentMatch(match).label}</span>
             </Link>)}
           </div>}
-        </section>
+        </section></div>
       })}
     </div>
     <p className="page-note">Source: football-data.org when loaded. All scores are delayed, not live. Results are stored only in temporary browser memory for local development, not published or persisted.</p>
