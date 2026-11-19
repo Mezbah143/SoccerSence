@@ -7,6 +7,8 @@ const gateway = createGateway({
   freePlanConfirmed: process.env.FOOTBALL_FREE_PLAN_CONFIRMED === 'true',
   rightsReview: process.env.FOOTBALL_RIGHTS_REVIEW ?? '',
   token: process.env.FOOTBALL_API_KEY ?? '',
+  teamDetailsConfirmed: process.env.FOOTBALL_TEAM_DETAILS_CONFIRMED === 'true',
+  teamMatchesConfirmed: process.env.FOOTBALL_TEAM_MATCHES_CONFIRMED === 'true',
 })
 const server = createServer(createHandler(gateway))
 server.requestTimeout = 10_000

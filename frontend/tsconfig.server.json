@@ -4,6 +4,6 @@
     "strict": true, "skipLibCheck": true, "types": ["node"],
     "lib": ["ES2022", "DOM"], "rootDir": ".", "outDir": ".server"
   },
-  "include": ["server/**/*.ts", "src/providers/footballData.ts", "src/providers/standings.ts"],
+  "include": ["server/**/*.ts", "src/providers/footballData.ts", "src/providers/standings.ts", "src/providers/team.ts"],
   "exclude": ["server/**/*.test.ts"]
 }

@@ -212,4 +212,77 @@ describe('local provider gateway', () => {
     expect(result.status).toBe(502)
   })
 
+
+  const teamTable={competition:{name:'Example League'},standings:[{type:'TOTAL',stage:'REGULAR_SEASON',group:null,table:[{
+    position:1,team:{id:57,name:'Sample FC'},playedGames:12,won:6,draw:4,lost:2,points:22,goalsFor:20,goalsAgainst:10,goalDifference:10
+  }]}]}
+  const team={id:57,name:'Sample FC',venue:'Example Ground',crest:'UNLICENSED_IMAGE',squad:[{name:'Do not expose'}]}
+  const recent={matches:[{id:81,utcDate:'2026-11-19T08:00:00Z',status:'FINISHED',
+    homeTeam:{id:57,name:'Sample FC'},awayTeam:{id:58,name:'Another FC'},
+    score:{fullTime:{home:2,away:1}},crest:'UNLICENSED_IMAGE'}]}
+  it('disables both optional team endpoints before network use by default',async()=>{
+    const fetcher=vi.fn<typeof fetch>()
+    const gateway=createGateway(config,fetcher)
+    expect((await gateway('/api/team?competition=PL&id=57')).body.error).toBe('team_endpoint_not_confirmed')
+    expect((await gateway('/api/team-matches?competition=PL&id=57')).body.error).toBe('team_endpoint_not_confirmed')
+    expect(fetcher).not.toHaveBeenCalled()
+  })
+  it('only lets a verified standings team ID use optional, separately confirmed endpoints',async()=>{
+    const fetcher=vi.fn<typeof fetch>().mockImplementation(async(url)=>{
+      const path=String(url)
+      if(path.endsWith('/standings'))return json(teamTable)
+      if(path.endsWith('/teams/57'))return json(team)
+      if(path.includes('/teams/57/matches?'))return json(recent)
+      throw Error('unexpected upstream route')
+    })
+    const gateway=createGateway({...config,teamDetailsConfirmed:true,teamMatchesConfirmed:true},fetcher)
+    expect((await gateway('/api/team?competition=PL&id=57')).body.error).toBe('unverified_team_id')
+    expect(fetcher).not.toHaveBeenCalled()
+    expect((await gateway('/api/standings?competition=PL')).status).toBe(200)
+    const info=await gateway('/api/team?competition=PL&id=57')
+    const history=await gateway('/api/team-matches?competition=PL&id=57')
+    expect(info.status).toBe(200)
+    expect(info.body.team).toMatchObject({id:'57',name:'Sample FC',venue:'Example Ground'})
+    expect(history.status).toBe(200)
+    expect((history.body.matches as {id:string}[]).map(m=>m.id)).toEqual(['81'])
+    expect(fetcher).toHaveBeenCalledTimes(3)
+    expect(fetcher.mock.calls[1][0]).toBe('https://api.football-data.org/v4/teams/57')
+    expect(fetcher.mock.calls[2][0]).toBe('https://api.football-data.org/v4/teams/57/matches?status=FINISHED&limit=5')
+    expect(JSON.stringify(info)+JSON.stringify(history)).not.toContain(config.token)
+    expect(JSON.stringify(info)+JSON.stringify(history)).not.toContain('UNLICENSED_IMAGE')
+    expect(JSON.stringify(info)).not.toContain('squad')
+    expect((await gateway('/api/team?competition=PL&id=58')).status).toBe(403)
+    expect(fetcher).toHaveBeenCalledTimes(3)
+  })
+  it.each(['/api/team?competition=PL&id=0','/api/team?competition=PL&id=57%2Fmatches',
+    '/api/team?competition=PL&id=57&scope=anything','/api/team?competition=UNKNOWN&id=57',
+    '/api/team-matches?competition=PL&id=../../credentials'])('rejects dangerous or unsupported team routes: %s',async path=>{
+    const fetcher=vi.fn<typeof fetch>()
+    expect((await createGateway({...config,teamDetailsConfirmed:true,teamMatchesConfirmed:true},fetcher)(path)).status).toBe(400)
+    expect(fetcher).not.toHaveBeenCalled()
+  })
+  it('optional team 403 disables only that endpoint, keeping verified standings working',async()=>{
+    const fetcher=vi.fn<typeof fetch>().mockImplementation(async(url)=>
+      String(url).endsWith('/standings')?json(teamTable):new Response('SECRET',{status:403}))
+    const gateway=createGateway({...config,teamDetailsConfirmed:true,teamMatchesConfirmed:true},fetcher)
+    expect((await gateway('/api/standings?competition=PL')).status).toBe(200)
+    expect((await gateway('/api/team?competition=PL&id=57')).body.error).toBe('team_endpoint_denied')
+    expect((await gateway('/api/team?competition=PL&id=57')).status).toBe(503)
+    expect((await gateway('/api/standings?competition=PL')).status).toBe(200)
+    expect(fetcher).toHaveBeenCalledTimes(3)
+  })
+  it('all optional team calls draw from existing shared six-request budget',async()=>{
+    const fetcher=vi.fn<typeof fetch>().mockImplementation(async(url)=>{
+      const path=String(url)
+      if(path.endsWith('/standings'))return json(teamTable)
+      if(path.endsWith('/teams/57'))return json(team)
+      return json(recent)
+    })
+    const gateway=createGateway({...config,teamDetailsConfirmed:true,teamMatchesConfirmed:true},fetcher,()=>0)
+    expect((await gateway('/api/standings?competition=PL')).status).toBe(200)
+    for(let i=0;i<5;i++)expect((await gateway('/api/team?competition=PL&id=57')).status).toBe(200)
+    expect((await gateway('/api/team-matches?competition=PL&id=57')).status).toBe(429)
+    expect(fetcher).toHaveBeenCalledTimes(6)
+  })
+
 })
