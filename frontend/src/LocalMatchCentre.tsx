@@ -2,6 +2,7 @@ import {useEffect,useRef,useState} from 'react'
 import {Link,useLocation} from 'react-router-dom'
 import {CalendarDays,Clock3,Info,ChevronLeft,ChevronRight} from 'lucide-react'
 import {shiftDay,todayInKst,validDay} from './dateNavigation'
+import {presentMatch} from './matchPresentation'
 import {loadLocalFixtures,utcKickoffLabel,type LocalFixturesResult} from './localFixtures'
 import {LOCAL_COMPETITIONS,type LocalCompetitionCode,localCompetitionName} from './localCompetitions'
 
@@ -72,10 +73,10 @@ export function LocalMatchCentre({initialDate,initialResult,initialCompetition='
     {result&&result.matches.length===0&&<div className="empty"><CalendarDays size={32} aria-hidden="true"/><h3>No fixtures for this Korean date</h3><p>Try another day. No fictional matches are displayed in this mode.</p></div>}
     {result&&result.matches.length>0&&<div className="match-grid">
       {result.matches.map(match=><Link to={'/real-match/'+match.id} state={{day:date,result,competition,zone}} className="match-card real-match-card" key={match.id} aria-label={'Match details: '+match.home+' versus '+match.away}>
-        <div className="match-meta"><span>● {match.competition}</span><span className="pill">{match.status==='FINISHED'?'Full time':match.status==='TIMED'?'Scheduled':match.status}</span></div>
+        <div className="match-meta"><span>● {match.competition}</span><span className={'pill m6-status-'+presentMatch(match).tone}>{presentMatch(match).label}</span></div>
         <div className="team"><span><b className="crest" aria-hidden="true">{match.home.slice(0,2).toUpperCase()}</b>{match.home}</span><strong>{match.homeScore??'–'}</strong></div>
         <div className="team"><span><b className="crest purple" aria-hidden="true">{match.away.slice(0,2).toUpperCase()}</b>{match.away}</span><strong>{match.awayScore??'–'}</strong></div>
-        <div className="match-bottom"><Clock3 size={14} aria-hidden="true"/>{utcKickoffLabel(match.kickoffUtc)}<span>View details ›</span></div>
+        <div className="match-bottom"><Clock3 size={14} aria-hidden="true"/>{utcKickoffLabel(match.kickoffUtc)}<span>Match centre ›</span></div>
       </Link>)}
     </div>}
   </section>
