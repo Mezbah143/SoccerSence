@@ -3,7 +3,7 @@ import {Link,useLocation} from 'react-router-dom'
 import {CalendarDays,Goal,Heart,Menu,Newspaper,Search,Settings2,Trophy} from 'lucide-react'
 import {LOCAL_COMPETITIONS,localCompetitionName} from './localCompetitions'
 import {isPrimarySectionActive} from './primaryNavigation'
-import {clearFavorites,DEFAULT_PREFERENCES,favoriteKey,savePreferences,toggleFavorite,useFavorites,usePreferences,type Favorite} from './localPreferences'
+import {DEFAULT_PREFERENCES,favoriteKey,savePreferences,toggleFavorite,useFavorites,usePreferences,type Favorite} from './localPreferences'
 
 const sections=[
   {to:'/',label:'Matches',Icon:CalendarDays},
@@ -71,20 +71,7 @@ export function NewsPage(){
     <p className="page-note">External links open their publishers' websites. No articles, images or headlines are reproduced here; availability and publication dates belong to the sources.</p>
   </section>
 }
-export function FavoritesPage(){
-  const favorites=useFavorites()
-  return <section aria-label="Favorites">
-    <PageHeading eyebrow="YOUR FOOTBALL" title="Favorites" description="Save your favorite clubs and leagues on this device. No account, cloud sync or subscription required."/>
-    {favorites.length===0?<div className="empty"><Heart size={34} aria-hidden="true"/><h3>Build your personal shortlist</h3><p>Save leagues from Leagues, or open a club through local standings and tap Save.</p><Link to="/leagues">Explore leagues</Link></div>:
-    <><div className="favorites-list">{favorites.map(item=><div className="favorite-row" key={favoriteKey(item)}>
-      <span className="league-symbol" aria-hidden="true">{item.kind==='league'?<Trophy size={18}/>:<Heart size={18}/>}</span>
-      <div><strong>{item.name}</strong><span>{item.kind==='league'?'League':'Club · '+localCompetitionName(item.competition)}</span></div>
-      <Link className="tile-link" to={'/standings?competition='+(item.kind==='league'?item.id:item.competition)}>{item.kind==='league'?'Standings':'Find in standings'}</Link>
-      <button className="favorite-remove" type="button" onClick={()=>toggleFavorite(item)} aria-label={'Remove '+item.name+' from favorites'}>Remove</button>
-    </div>)}</div><button type="button" className="subtle-button" onClick={()=>clearFavorites()}>Clear saved favorites</button></>}
-    <p className="page-note">Favorite club profiles require a freshly loaded, verified standings table. Favorites remember club IDs and names only—not provider results or authentication data.</p>
-  </section>
-}
+export {FavoritesHub as FavoritesPage} from './FavoritesHub'
 export function SearchPage(){
   const [query,setQuery]=useState('')
   const favorites=useFavorites()
