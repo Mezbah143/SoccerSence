@@ -3,6 +3,7 @@ import {Info,ShieldCheck,Trophy} from 'lucide-react'
 import {readVerifiedTeamState} from './realTeamState'
 import {localCompetitionName} from './localCompetitions'
 import {TeamExtraPanel} from './TeamExtraPanel'
+import {FavoriteButton} from './SiteSections'
 
 export function LocalTeamProfile(){
   const {id}=useParams()
@@ -25,6 +26,7 @@ export function LocalTeamProfile(){
         <p>{result.competition} · {table.group??table.stage}</p>
       </div>
       <span className="pill">#{team.position} in table</span>
+      <FavoriteButton kind="team" id={teamId} name={team.team} competition={competition}/>
     </div>
     <div className="team-profile-stats" aria-label="Verified league table statistics">
       <div><strong>{team.points}</strong><span>Official points</span></div>
