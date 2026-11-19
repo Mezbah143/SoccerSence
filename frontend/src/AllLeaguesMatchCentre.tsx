@@ -93,7 +93,7 @@ export function AllLeaguesMatchCentre(){
     </div>
     <div className="m11-load-bar">
       <p><Info size={16} aria-hidden="true"/><span>Matches load automatically with one private, quota-limited multi-league request per selected KST date. Previously loaded days reuse memory. No polling, automatic retries or public real-data access.</span></p>
-      <button className="load-button" type="button" disabled={busy||autoLoading||!validDay(day)||ready===6} onClick={loadAll}>{busy?`Loading leagues… ${progress.done}/${progress.total}`:ready===6?'All leagues loaded':ready>0?'Load remaining fixtures':'Load all fixtures'}</button>
+      <button className="load-button" type="button" disabled={busy||autoLoading||!validDay(day)||ready===LOCAL_COMPETITIONS.length} onClick={loadAll}>{busy?`Loading leagues… ${progress.done}/${progress.total}`:ready===LOCAL_COMPETITIONS.length?'All leagues loaded':ready>0?'Load remaining fixtures':'Load all fixtures'}</button>
     </div>
     {autoLoading&&<p className="m11-progress" role="status">Loading supported club and international competitions automatically through one consolidated gateway request…</p>}
     {autoError&&<div className="m11-league-notice m11-error" role="alert">{autoError}</div>}
