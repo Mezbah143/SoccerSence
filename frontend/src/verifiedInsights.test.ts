@@ -28,7 +28,6 @@ describe('M7 verified match-day insights',()=>{
     expect(typeof matchDayInsights).toBe('function')
   })
 })
-const table={competition:{name:'Fictional League'},standings:[]}
 describe('M7 verified standings aggregates',()=>{
   it('derives season rates without modifying official deducted points',()=>{
     const result=parseLocalStandings({...meta,competition:'Example League',tables:[{stage:'REGULAR_SEASON',group:null,rows:[{
