@@ -357,3 +357,39 @@ describe('M12 one-call consolidated league gateway',()=>{
     expect(fetcher).toHaveBeenCalledTimes(6)
   })
 })
+
+describe('M13 club cups and international tournaments',()=>{
+  const route='/api/all-fixtures?date=2026-11-24&tz=KST'
+  const fixture=(id:number,competitionId:number)=>({
+    id,utcDate:'2026-11-23T22:00:00Z',status:'SCHEDULED',
+    competition:{id:competitionId,name:'Example Competition'},
+    homeTeam:{name:'Home Nation or Club'},awayTeam:{name:'Away Nation or Club'},
+  })
+  it('groups Champions League, World Cup and European Championship from one response',async()=>{
+    const fetcher=vi.fn<typeof fetch>().mockResolvedValue(json({matches:[
+      fixture(101,2001),fixture(102,2000),fixture(103,2018),fixture(104,9999),
+    ]}))
+    const gateway=createGateway(config,fetcher)
+    const response=await gateway(route)
+    expect(response.status).toBe(200)
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    const leagues=response.body.leagues as Record<string,{id:string}[]>
+    expect(leagues.CL.map(x=>x.id)).toEqual(['101'])
+    expect(leagues.WC.map(x=>x.id)).toEqual(['102'])
+    expect(leagues.EC.map(x=>x.id)).toEqual(['103'])
+    expect(leagues.PL).toEqual([])
+    expect(Object.keys(leagues)).toHaveLength(9)
+    expect(JSON.stringify(response)).not.toContain(config.token)
+  })
+  it('supports fixed match endpoints for the three new competition codes without arbitrary expansion',async()=>{
+    for(const code of ['CL','WC','EC']){
+      const fetcher=vi.fn<typeof fetch>().mockResolvedValue(json({matches:[]}))
+      const response=await createGateway(config,fetcher)('/api/fixtures?competition='+code+'&date=2026-11-24&tz=KST')
+      expect(response.status).toBe(200)
+      expect(fetcher.mock.calls[0][0]).toContain('/competitions/'+code+'/matches?')
+    }
+    const fetcher=vi.fn<typeof fetch>()
+    expect((await createGateway(config,fetcher)('/api/fixtures?competition=QAFC&date=2026-11-24&tz=KST')).status).toBe(400)
+    expect(fetcher).not.toHaveBeenCalled()
+  })
+})
