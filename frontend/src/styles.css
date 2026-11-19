@@ -115,3 +115,21 @@
 .team-profile .source-panel svg{vertical-align:middle;margin-right:5px}
 @media(max-width:760px){.team-profile-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.team-profile-header{padding:20px;gap:14px}.team-profile-header>div{min-width:0;flex-basis:calc(100% - 95px)}}
 @media(max-width:380px){.team-profile-stats>div{padding:14px}.team-profile-header>.pill{margin-left:0}}
+
+/* M5-2 opt-in local club data; buttons are explicit and never automatically polled. */
+.team-extra-panel{margin:26px 0;padding:22px;border:1px solid #35534a;background:#1b292b;border-radius:14px}
+.team-extra-panel>h2{font-size:19px;margin:0 0 12px}
+.team-extra-actions{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}
+.team-extra-actions .load-button{min-height:44px}
+.team-extra-status{border:1px solid #3d5753;border-radius:9px;padding:13px 15px;color:#d7e8e0;font-size:13px;line-height:1.65}
+.team-extra-card{margin-top:16px;border-top:1px solid #38534a;padding-top:16px}
+.team-extra-card h3{font-size:16px;margin:4px 0 14px}
+.team-extra-card dl{display:grid;grid-template-columns:minmax(100px,auto) 1fr;gap:10px 16px;font-size:13px}
+.team-extra-card dt{color:#a7c3b7}
+.team-extra-card dd{margin:0;overflow-wrap:anywhere}
+.team-extra-source{font-size:12px;color:#aed7be;line-height:1.6}
+.team-results-list{list-style:none;margin:0;padding:0}
+.team-results-list li{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;padding:12px 0;border-bottom:1px solid #354f46;font-size:13px}
+.team-results-list li>span{display:flex;gap:7px;align-items:center;color:#afd3c0;flex-shrink:0}
+.team-results-list li strong{text-align:right;overflow-wrap:anywhere}
+@media(max-width:620px){.team-extra-panel{padding:16px}.team-extra-actions{flex-direction:column}.team-extra-actions .load-button{width:100%}.team-results-list li{flex-direction:column;gap:5px}.team-results-list li strong{text-align:left}}
