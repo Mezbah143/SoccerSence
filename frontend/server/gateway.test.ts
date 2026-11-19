@@ -336,7 +336,7 @@ describe('M12 one-call consolidated league gateway',()=>{
     expect(fetcher).toHaveBeenCalledTimes(2)
   })
   it('uses the same shared rate limits without six separate calls',async()=>{
-    const fetcher=vi.fn<typeof fetch>().mockResolvedValue(json({matches:[]}))
+    const fetcher=vi.fn<typeof fetch>().mockImplementation(async()=>json({matches:[]}))
     const gateway=createGateway(config,fetcher,()=>0)
     for(let i=0;i<6;i++)expect((await gateway(route)).status).toBe(200)
     expect((await gateway(route)).status).toBe(429)
