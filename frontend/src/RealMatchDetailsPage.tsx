@@ -3,6 +3,7 @@ import {ArrowLeft,ArrowRight,CalendarClock,ChevronLeft,ChevronRight,Clock3,Info,
 import {utcKickoffLabel} from './localFixtures'
 import {readVerifiedMatchState} from './realMatchState'
 import {nearbyMatches,presentMatch} from './matchPresentation'
+import {matchDayInsights} from './verifiedInsights'
 import {localCompetitionName} from './localCompetitions'
 
 export function RealMatchDetailsPage(){
@@ -18,6 +19,7 @@ export function RealMatchDetailsPage(){
   const {match,result,day,competition,zone}=verified
   const presentation=presentMatch(match)
   const neighbors=nearbyMatches(result,match.id)
+  const insights=matchDayInsights(result)
   const state={day,result,competition,zone}
   const navigationState={mode:'local',...state}
   return <section className="detail match-centre-v2" aria-label="Real match details">
@@ -64,6 +66,23 @@ export function RealMatchDetailsPage(){
         <p className="m6-navigation-hint">Club profiles are accessible from verified standings tables; the current fixture response does not include reliable team IDs.</p>
       </div>
     </div>
+    <section className="m7-insights" aria-label="Verified match-day insights">
+      <div className="m7-insights-heading"><div><p className="kicker">M7 · VERIFIED INSIGHTS</p><h2>Match-day snapshot</h2></div><span className="pill">Selected {zone} day only</span></div>
+      <p className="mode-hint"><Info size={16} aria-hidden="true"/><span>These figures summarize only fixtures already loaded for {day} in {localCompetitionName(competition)}. They are not recent team form, predictions, or live statistics.</span></p>
+      <div className="m7-insight-grid">
+        <div><strong>{insights.total}</strong><span>Fixtures returned</span></div>
+        <div><strong>{insights.completed}</strong><span>Finished with scores</span></div>
+        <div><strong>{insights.pending}</strong><span>Other / no final score</span></div>
+        <div><strong>{insights.goals}</strong><span>Goals in finished matches</span></div>
+      </div>
+      {insights.completed>0?<div className="m7-breakdown">
+        <h3>Results among finished matches on this date</h3>
+        <div className="m7-breakdown-row"><span>Home wins</span><strong>{insights.homeWins}</strong></div>
+        <div className="m7-breakdown-row"><span>Draws</span><strong>{insights.draws}</strong></div>
+        <div className="m7-breakdown-row"><span>Away wins</span><strong>{insights.awayWins}</strong></div>
+        <p>Average goals per finished match: <strong>{insights.averageGoals}</strong></p>
+      </div>:<p className="m7-empty-note">No finished matches with final scores are available for this selected day. Result breakdowns and averages are not calculated.</p>}
+    </section>
     <div className="m6-fixture-navigation" aria-label="Same-day fixture navigation">
       {neighbors.previous?<Link to={'/real-match/'+neighbors.previous.id} state={state}><ChevronLeft size={18} aria-hidden="true"/><span><small>Previous match</small><strong>{neighbors.previous.home} vs {neighbors.previous.away}</strong></span></Link>:<span className="m6-neighbor-disabled">First match of this day</span>}
       <span className="m6-match-count">Match {neighbors.index} of {neighbors.total}</span>

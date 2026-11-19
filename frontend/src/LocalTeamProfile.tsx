@@ -4,6 +4,7 @@ import {readVerifiedTeamState} from './realTeamState'
 import {localCompetitionName} from './localCompetitions'
 import {TeamExtraPanel} from './TeamExtraPanel'
 import {FavoriteButton} from './SiteSections'
+import {seasonTableInsights} from './verifiedInsights'
 
 export function LocalTeamProfile(){
   const {id}=useParams()
@@ -16,6 +17,7 @@ export function LocalTeamProfile(){
     <Link to="/standings">Back to standings</Link>
   </div>
   const {team,table,result,competition,teamId,tableIndex}=verified
+  const insights=seasonTableInsights(team)
   return <section className="detail team-profile" aria-label="Local team profile">
     <Link to="/standings" state={{competition,result,teamId,tableIndex}}>‹ Back to {localCompetitionName(competition)} standings</Link>
     <div className="team-profile-header">
@@ -45,6 +47,17 @@ export function LocalTeamProfile(){
         <p>No additional provider request was made to open this page.</p>
       </div>
     </div>
+    <section className="m7-insights" aria-label="Season-to-date club insights">
+      <div className="m7-insights-heading"><div><p className="kicker">M7 · TABLE-BASED INSIGHTS</p><h2>Season-to-date performance</h2></div><span className="pill">Verified standings</span></div>
+      <p className="mode-hint"><Info size={16} aria-hidden="true"/><span>Calculated from the current official league table only, not a recent-five-match form guide. Values may include official point deductions.</span></p>
+      {insights.played>0?<div className="m7-insight-grid">
+        <div><strong>{insights.winRate}%</strong><span>Win rate</span></div>
+        <div><strong>{insights.drawRate}%</strong><span>Draw rate</span></div>
+        <div><strong>{insights.goalsForPerMatch}</strong><span>Goals scored / game</span></div>
+        <div><strong>{insights.goalsAgainstPerMatch}</strong><span>Goals conceded / game</span></div>
+      </div>:<p className="m7-empty-note">This club has no recorded matches in the selected table, so percentages and per-game averages are unavailable.</p>}
+      <p className="m7-insights-footnote">Based on {team.played} played match{team.played===1?'':'es'}. These aggregates do not indicate upcoming match outcomes and require no additional provider request.</p>
+    </section>
     <TeamExtraPanel competition={competition} teamId={teamId}/>
     <div className="source-panel"><ShieldCheck size={16} aria-hidden="true"/> <strong>{result.source}</strong> · Delayed data · Retrieved {new Date(result.fetchedAt).toLocaleString('en-GB',{timeZone:'Asia/Seoul'})} KST<div>{result.attribution}</div></div>
     <p className="mode-hint">Local development only · No external crests, photos or premium team data.</p>
