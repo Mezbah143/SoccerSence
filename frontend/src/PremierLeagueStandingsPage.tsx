@@ -1,11 +1,15 @@
 import {useEffect,useRef,useState} from 'react'
+import {Link,useLocation} from 'react-router-dom'
+import {readVerifiedTeamState} from './realTeamState'
 import {Info,Trophy} from 'lucide-react'
 import {loadLocalStandings,type LocalStandingsResult} from './localStandings'
 import {LOCAL_COMPETITIONS,type LocalCompetitionCode,localCompetitionName} from './localCompetitions'
 
 export function LocalStandings() {
-  const [competition,setCompetition]=useState<LocalCompetitionCode>('PL')
-  const [result,setResult]=useState<LocalStandingsResult|null>(null)
+  const location=useLocation()
+  const restored=import.meta.env.DEV?readVerifiedTeamState(location.state):null
+  const [competition,setCompetition]=useState<LocalCompetitionCode>(restored?.competition??'PL')
+  const [result,setResult]=useState<LocalStandingsResult|null>(restored?.result??null)
   const [loading,setLoading]=useState(false)
   const [error,setError]=useState('')
   const controller=useRef<AbortController|null>(null)
@@ -66,7 +70,7 @@ export function LocalStandings() {
             <th scope="col" title="Points">Pts</th>
           </tr></thead>
           <tbody>{table.rows.map(row=><tr key={row.teamId}>
-            <td>{row.position}</td><th scope="row">{row.team}</th><td>{row.played}</td>
+            <td>{row.position}</td><th scope="row"><Link className="standings-team-link" to={'/team/'+row.teamId} state={{competition,result,teamId:row.teamId,tableIndex:index}} aria-label={'View '+row.team+' team profile'}>{row.team}</Link></th><td>{row.played}</td>
             <td>{row.won}</td><td>{row.drawn}</td><td>{row.lost}</td>
             <td>{row.goalsFor}</td><td>{row.goalsAgainst}</td>
             <td>{row.goalDifference>0?'+'+row.goalDifference:row.goalDifference}</td>
