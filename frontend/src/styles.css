@@ -98,3 +98,20 @@
   .real-match-card .team{font-size:13px}
   .real-match-card .match-bottom span{margin-left:0;width:100%}
 }
+
+/* M5 local-only standings-powered club profiles */
+.standings-team-link{color:#c6f3d4;text-decoration:underline;text-decoration-color:#507b65;text-underline-offset:3px}
+.standings-team-link:hover{color:#92efb7;text-decoration-color:currentColor}
+.team-profile-header{display:flex;align-items:center;gap:21px;flex-wrap:wrap;background:#1b292b;border:1px solid #344e47;border-radius:16px;padding:28px;margin:22px 0}
+.team-profile-header>div{flex:1;min-width:190px}
+.team-profile-header h1{margin:6px 0 7px;font-size:clamp(23px,3vw,37px);overflow-wrap:anywhere}
+.team-profile-header p:last-child{color:#bacfcb;font-size:14px}
+.team-profile-monogram{width:62px;height:62px;font-size:18px;flex:none}
+.team-profile-header>.pill{white-space:nowrap}
+.team-profile-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:20px 0 24px}
+.team-profile-stats>div{display:flex;flex-direction:column;gap:8px;padding:18px;background:#1b272c;border:1px solid #34474b;border-radius:12px}
+.team-profile-stats strong{font-size:clamp(24px,3vw,34px);color:#a5f0c0;font-variant-numeric:tabular-nums}
+.team-profile-stats span{font-size:12px;color:#b3c8bf}
+.team-profile .source-panel svg{vertical-align:middle;margin-right:5px}
+@media(max-width:760px){.team-profile-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.team-profile-header{padding:20px;gap:14px}.team-profile-header>div{min-width:0;flex-basis:calc(100% - 95px)}}
+@media(max-width:380px){.team-profile-stats>div{padding:14px}.team-profile-header>.pill{margin-left:0}}
