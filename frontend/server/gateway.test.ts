@@ -321,11 +321,25 @@ describe('M12 one-call consolidated league gateway',()=>{
     expect((await createGateway(config,fetcher)(path)).status).toBe(400)
     expect(fetcher).not.toHaveBeenCalled()
   })
-  it('rejects unexpected and corrupt competition identities rather than mislabeling a league',async()=>{
-    for(const item of [mk(1,9999,'2026-11-21T10:00:00Z'),{...mk(1,2021,'2026-11-21T10:00:00Z'),competition:{name:'no id'}}]){
-      const gateway=createGateway(config,vi.fn<typeof fetch>().mockResolvedValue(json({matches:[item]})))
-      expect((await gateway(route)).status).toBe(502)
-    }
+  it('ignores unrelated provider competitions without mislabeling or dropping valid league results',async()=>{
+    const provider=vi.fn<typeof fetch>().mockResolvedValue(json({matches:[
+      mk(1,9999,'2026-11-21T10:00:00Z'),mk(2,2021,'2026-11-21T10:00:00Z')
+    ]}))
+    const result=await createGateway(config,provider)(route)
+    expect(result.status).toBe(200)
+    const leagues=result.body.leagues as Record<string,{id:string}[]>
+    expect(leagues.PL.map(match=>match.id)).toEqual(['2'])
+    expect(Object.values(leagues).flat()).toHaveLength(1)
+  })
+  it('rejects corrupt match payloads, even if the competition is not supported',async()=>{
+    const item={...mk(1,9999,'2026-11-21T10:00:00Z'),id:'not-a-number'}
+    expect((await createGateway(config,vi.fn<typeof fetch>().mockResolvedValue(json({matches:[item]})))(route)).status).toBe(502)
+  })
+  it('identifies rejected aggregate filters without revealing the provider response body',async()=>{
+    const fetcher=vi.fn<typeof fetch>().mockResolvedValue(new Response(config.token,{status:400}))
+    const result=await createGateway(config,fetcher)(route)
+    expect(result).toEqual({status:422,body:{error:'aggregate_filter_rejected'}})
+    expect(JSON.stringify(result)).not.toContain(config.token)
   })
   it('does not disable valid single-league lookups after aggregate 403',async()=>{
     const fetcher=vi.fn<typeof fetch>().mockImplementation(async url=>
