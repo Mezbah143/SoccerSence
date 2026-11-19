@@ -1,7 +1,7 @@
 import {useEffect,useState} from 'react'
 import {Link,useLocation} from 'react-router-dom'
 import {CalendarDays,Goal,Heart,Menu,Newspaper,Search,Settings2,Trophy} from 'lucide-react'
-import {LOCAL_COMPETITIONS,localCompetitionName} from './localCompetitions'
+import {LOCAL_COMPETITIONS,localCompetitionName,isInternationalCompetition} from './localCompetitions'
 import {isPrimarySectionActive} from './primaryNavigation'
 import {DEFAULT_PREFERENCES,favoriteKey,savePreferences,toggleFavorite,useFavorites,usePreferences,type Favorite} from './localPreferences'
 
@@ -47,12 +47,21 @@ function FavoriteButton({kind,id,name,competition}:{kind:'league'|'team';id:stri
 export {FavoriteButton}
 export function LeaguesPage(){
   return <section aria-label="Leagues">
-    <PageHeading eyebrow="DISCOVER FOOTBALL" title="Leagues" description="Choose a competition to explore its standings and clubs. Real tables load only when you request them locally."/>
-    <div className="app-tile-grid">{LOCAL_COMPETITIONS.map((league,i)=><article className="app-tile" key={league.code}>
+    <PageHeading eyebrow="DISCOVER FOOTBALL" title="Competitions" description="Follow domestic leagues, UEFA Champions League and international tournaments. Tables load manually where the provider offers them."/>
+    <div className="m13-league-directory">
+      <h2 className="m13-directory-heading">Club competitions</h2>
+      <div className="app-tile-grid">{LOCAL_COMPETITIONS.filter(item=>!isInternationalCompetition(item.code)).map((league,i)=><article className="app-tile" key={league.code}>
       <div className="league-symbol" aria-hidden="true">{String(i+1).padStart(2,'0')}</div>
       <div className="tile-body"><span className="tile-overline">COMPETITION</span><h2>{league.name}</h2><p>{import.meta.env.DEV?'Standings & club profiles':'Public preview: local data unavailable'}</p></div>
       <div className="tile-actions"><Link className="tile-link" to={'/standings?competition='+league.code}>View standings <span aria-hidden="true">›</span></Link><FavoriteButton kind="league" id={league.code} name={league.name}/></div>
     </article>)}</div>
+      <h2 className="m13-directory-heading">International tournaments</h2>
+      <div className="app-tile-grid">{LOCAL_COMPETITIONS.filter(item=>isInternationalCompetition(item.code)).map(league=><article className="app-tile" key={league.code}>
+        <div className="league-symbol" aria-hidden="true"><Trophy size={20}/></div>
+        <div className="tile-body"><span className="tile-overline">NATIONAL TEAMS</span><h2>{league.name}</h2><p>Match schedules and available tournament standings. No friendly matches or qualifiers are claimed.</p></div>
+        <div className="tile-actions"><Link className="tile-link" to={'/standings?competition='+league.code}>View standings <span aria-hidden="true">›</span></Link><FavoriteButton kind="league" id={league.code} name={league.name}/></div>
+      </article>)}</div>
+    </div>
   </section>
 }
 export function NewsPage(){
