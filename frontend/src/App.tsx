@@ -6,13 +6,14 @@ import {LocalMatchCentre} from './LocalMatchCentre'
 import {RealMatchDetailsPage} from './RealMatchDetailsPage'
 import {readVerifiedMatchState} from './realMatchState'
 import {LocalStandings} from './PremierLeagueStandingsPage'
+import {initialFixtureMode} from './fixtureMode'
 function dateShift(value:string,days:number){const d=new Date(value+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10)}
 function DemoHome(){const [date,setDate]=useState('2026-11-14');const [league,setLeague]=useState('All competitions');const matches=matchesOn(date,league);return <><section className="hero"><p className="kicker">THE BEAUTIFUL GAME, SIMPLIFIED</p><h1>Football, <em>in focus.</em></h1><p>Fixtures, scores and the details that matter. Built for fans.</p><Goal size={90} className="hero-ball" aria-hidden="true"/></section><div className="section-title"><div><p className="kicker">MATCH CENTRE</p><h2>Matches & fixtures</h2></div><span className="pill">{matches.length} matches</span></div><div className="filters"><div className="date-picker"><button aria-label="Previous day" onClick={()=>setDate(dateShift(date,-1))}><ChevronLeft size={18}/></button><span><CalendarDays size={16}/>{date}</span><button aria-label="Next day" onClick={()=>setDate(dateShift(date,1))}><ChevronRight size={18}/></button></div><label>Competition <select value={league} onChange={e=>setLeague(e.target.value)}>{leagues.map(item=><option key={item}>{item}</option>)}</select></label></div>{matches.length?<div className="match-grid">{matches.map(m=><Link to={'/match/'+m.id} className="match-card" key={m.id}><div className="match-meta"><span>● {m.competition}</span><span className="pill">{m.status==='finished'?'Full time':'Scheduled'}</span></div><div className="team"><span><b className="crest">{m.home.slice(0,2).toUpperCase()}</b>{m.home}</span><strong>{m.score?m.score[0]:'–'}</strong></div><div className="team"><span><b className="crest purple">{m.away.slice(0,2).toUpperCase()}</b>{m.away}</span><strong>{m.score?m.score[1]:'–'}</strong></div><div className="match-bottom"><Clock3 size={14}/>{m.time}<span>Match details ›</span></div></Link>)}</div>:<div className="empty"><CalendarDays size={32}/><h3>No demo matches for this date</h3><p>Try November 14 or 15, 2026. No real football feed is connected.</p><button onClick={()=>{setDate('2026-11-14');setLeague('All competitions')}}>Show demo fixtures</button></div>}</>}
 function Home(){
   const location=useLocation()
   const restored=readVerifiedMatchState(location.state)
-  const prefersLocal=import.meta.env.DEV && (!!restored || (location.state as {mode?:unknown}|null)?.mode==='local')
-  const [mode,setMode]=useState<'demo'|'local'>(prefersLocal?'local':'demo')
+  const requestedMode=(location.state as {mode?:unknown}|null)?.mode
+  const [mode,setMode]=useState<'demo'|'local'>(()=>initialFixtureMode(import.meta.env.DEV,requestedMode))
   return <>
     <div className="mode-switch" role="group" aria-label="Fixture data mode">
       <button type="button" className={mode==='demo'?'selected':''} onClick={()=>setMode('demo')} aria-pressed={mode==='demo'}>Fictional demo</button>
