@@ -34,10 +34,26 @@ describe('M12 consolidated automatic fixtures',()=>{
     await loadAggregatedDay(day,signal)
     expect(fetcher).toHaveBeenCalledTimes(1)
   })
+  it('explains sanitized gateway errors without retrying or exposing provider payloads',async()=>{
+    const scenarios=[
+      {status:422,body:{error:'aggregate_filter_rejected'},expected:'aggregate_filter_rejected'},
+      {status:502,body:{error:'invalid_provider_response'},expected:'aggregate_invalid_provider_response'},
+      {status:502,body:{error:'aggregate_response_unavailable'},expected:'aggregate_response_unavailable'},
+      {status:503,body:{error:'provider_disabled'},expected:'gateway_disabled'},
+    ]
+    for(const scenario of scenarios){
+      clearAggregateRequestCache()
+      const fetcher=vi.fn().mockResolvedValue({ok:false,status:scenario.status,json:async()=>scenario.body})
+      vi.stubGlobal('fetch',fetcher)
+      await expect(loadAggregatedDay(day,new AbortController().signal)).rejects.toThrow(scenario.expected)
+      expect(fetcher).toHaveBeenCalledTimes(1)
+      expect(aggregateErrorMessage(new Error(scenario.expected))).not.toContain('Automatic league fixtures could not be verified')
+    }
+  })
   it('fails visibly without retrying a 503 or 429',async()=>{
     for(const status of [503,429]){
       clearAggregateRequestCache()
-      const fetcher=vi.fn().mockResolvedValue({ok:false,status})
+      const fetcher=vi.fn().mockResolvedValue({ok:false,status,json:async()=>({error:status===503?'aggregate_unavailable':'local_rate_limit'})})
       vi.stubGlobal('fetch',fetcher)
       const task=loadAggregatedDay(day,new AbortController().signal)
       await expect(task).rejects.toThrow(status===503?'aggregate_unavailable':'rate_limited')

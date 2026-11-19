@@ -46,7 +46,16 @@ export function loadAggregatedDay(day:string,signal:AbortSignal):Promise<DayResu
     lastStart=Date.now()
     const response=await fetch('/api/all-fixtures?date='+encodeURIComponent(day)+'&tz=KST',{method:'GET',cache:'no-store'})
     if(!response.ok){
+      const code=await response.json().then((body:unknown)=>{
+        if(body&&typeof body==='object'&&!Array.isArray(body)&&'error' in body&&typeof body.error==='string')return body.error
+        return ''
+      }).catch(()=>'')
       if(response.status===429)throw Error('rate_limited')
+      if(code==='aggregate_filter_rejected')throw Error('aggregate_filter_rejected')
+      if(code==='aggregate_unavailable')throw Error('aggregate_unavailable')
+      if(code==='invalid_provider_response')throw Error('aggregate_invalid_provider_response')
+      if(code==='aggregate_response_unavailable')throw Error('aggregate_response_unavailable')
+      if(code==='provider_disabled'||code==='provider_access_blocked')throw Error('gateway_disabled')
       if(response.status===503)throw Error('aggregate_unavailable')
       throw Error('gateway_unavailable')
     }
@@ -63,7 +72,11 @@ export function loadAggregatedDay(day:string,signal:AbortSignal):Promise<DayResu
 }
 export function aggregateErrorMessage(error:unknown){
   if(error instanceof Error&&error.message==='rate_limited')return 'The local gateway quota is exhausted. No automatic retry will occur; use your existing manual loading option when the quota resets.'
-  if(error instanceof Error&&error.message==='aggregate_unavailable')return 'The multi-competition endpoint is unavailable for this account or local gateway. You can still load the leagues manually.'
+  if(error instanceof Error&&error.message==='aggregate_unavailable')return 'The provider denied the multi-competition endpoint for this account (or the local endpoint is disabled). Existing manual league loading remains available.'
+  if(error instanceof Error&&error.message==='aggregate_filter_rejected')return 'The provider rejected the consolidated date/competition filters. Try manual league loading; no automatic retries will occur.'
+  if(error instanceof Error&&error.message==='aggregate_invalid_provider_response')return 'The provider returned match data the app could not safely validate. No unverified matches are shown.'
+  if(error instanceof Error&&error.message==='aggregate_response_unavailable')return 'The provider response could not be read or validated. Manual league loading remains available.'
+  if(error instanceof Error&&error.message==='gateway_disabled')return 'The local football gateway is disabled or provider access has been blocked. Check the gateway terminal.'
   if(error instanceof Error&&error.message==='aborted')return ''
   return 'Automatic league fixtures could not be verified. No fictional results have been substituted; manual loading is still available.'
 }
