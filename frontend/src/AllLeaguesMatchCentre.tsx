@@ -26,7 +26,6 @@ export function AllLeaguesMatchCentre(){
       setResponses(getCachedDay(restored.day))
     }
     // Back-navigation recovery is performed once at mount; no provider fetch.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   },[])
   useEffect(()=>()=>abort.current?.abort(),[])
   useEffect(()=>{
