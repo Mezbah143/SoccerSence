@@ -4,13 +4,14 @@ import {CalendarDays,Clock3,Info,ChevronLeft,ChevronRight} from 'lucide-react'
 import {shiftDay,todayInKst,validDay} from './dateNavigation'
 import {presentMatch} from './matchPresentation'
 import {loadLocalFixtures,utcKickoffLabel,type LocalFixturesResult} from './localFixtures'
-import {LOCAL_COMPETITIONS,type LocalCompetitionCode,localCompetitionName} from './localCompetitions'
+import {LOCAL_COMPETITIONS,isLocalCompetition,type LocalCompetitionCode,localCompetitionName} from './localCompetitions'
 
 export function LocalMatchCentre({initialDate,initialResult,initialCompetition='PL',initialZone='KST'}:{initialDate?:string;initialResult?:LocalFixturesResult|null;initialCompetition?:LocalCompetitionCode;initialZone?:'UTC'|'KST'}) {
   const location=useLocation()
   useEffect(()=>{if(new URLSearchParams(location.search).get('calendar')==='1')document.getElementById('local-kst-match-date')?.focus()},[location.search])
   const [date,setDate]=useState(initialDate??todayInKst)
-  const [competition,setCompetition]=useState<LocalCompetitionCode>(initialCompetition)
+  const fromShortcut=new URLSearchParams(location.search).get('competition')
+  const [competition,setCompetition]=useState<LocalCompetitionCode>(initialResult?initialCompetition:isLocalCompetition(fromShortcut)?fromShortcut:initialCompetition)
   const [zone]=useState<'UTC'|'KST'>(initialZone)
   const [result,setResult]=useState<LocalFixturesResult|null>(initialResult??null)
   const [error,setError]=useState('')
