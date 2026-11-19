@@ -50,6 +50,17 @@ export function toggleFavorite(item:Favorite):Favorite[]{
   write(FAVORITES_KEY,updated)
   return updated
 }
+/** Reorder one saved item without changing IDs or creating provider requests. */
+export function moveFavorite(item:Favorite,direction:-1|1):Favorite[]{
+  const list=getFavorites()
+  const from=list.findIndex(entry=>favoriteKey(entry)===favoriteKey(item))
+  const to=from+direction
+  if(from<0||to<0||to>=list.length)return list
+  const reordered=[...list]
+  ;[reordered[from],reordered[to]]=[reordered[to],reordered[from]]
+  write(FAVORITES_KEY,reordered)
+  return reordered
+}
 export function savePreferences(next:Preferences){write(PREFS_KEY,validatePreferences(next))}
 export function clearFavorites(){write(FAVORITES_KEY,[])}
 function useSaved<T>(reader:()=>T):T{
