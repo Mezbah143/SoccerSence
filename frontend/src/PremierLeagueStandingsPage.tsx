@@ -2,13 +2,15 @@ import {useEffect,useRef,useState} from 'react'
 import {Link,useLocation} from 'react-router-dom'
 import {readVerifiedTeamState} from './realTeamState'
 import {Info,Trophy} from 'lucide-react'
+import {useSearchParams} from 'react-router-dom'
 import {loadLocalStandings,type LocalStandingsResult} from './localStandings'
-import {LOCAL_COMPETITIONS,type LocalCompetitionCode,localCompetitionName} from './localCompetitions'
+import {LOCAL_COMPETITIONS,isLocalCompetition,type LocalCompetitionCode,localCompetitionName} from './localCompetitions'
 
 export function LocalStandings() {
   const location=useLocation()
+  const [searchParams]=useSearchParams()
   const restored=import.meta.env.DEV?readVerifiedTeamState(location.state):null
-  const [competition,setCompetition]=useState<LocalCompetitionCode>(restored?.competition??'PL')
+  const [competition,setCompetition]=useState<LocalCompetitionCode>(restored?.competition??(isLocalCompetition(searchParams.get('competition'))?searchParams.get('competition') as LocalCompetitionCode:'PL'))
   const [result,setResult]=useState<LocalStandingsResult|null>(restored?.result??null)
   const [loading,setLoading]=useState(false)
   const [error,setError]=useState('')
