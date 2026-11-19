@@ -1,11 +1,13 @@
 import {useEffect,useRef,useState} from 'react'
-import {Link} from 'react-router-dom'
+import {Link,useLocation} from 'react-router-dom'
 import {CalendarDays,Clock3,Info,ChevronLeft,ChevronRight} from 'lucide-react'
 import {shiftDay,todayInKst,validDay} from './dateNavigation'
 import {loadLocalFixtures,utcKickoffLabel,type LocalFixturesResult} from './localFixtures'
 import {LOCAL_COMPETITIONS,type LocalCompetitionCode,localCompetitionName} from './localCompetitions'
 
 export function LocalMatchCentre({initialDate,initialResult,initialCompetition='PL',initialZone='KST'}:{initialDate?:string;initialResult?:LocalFixturesResult|null;initialCompetition?:LocalCompetitionCode;initialZone?:'UTC'|'KST'}) {
+  const location=useLocation()
+  useEffect(()=>{if(new URLSearchParams(location.search).get('calendar')==='1')document.getElementById('local-kst-match-date')?.focus()},[location.search])
   const [date,setDate]=useState(initialDate??todayInKst)
   const [competition,setCompetition]=useState<LocalCompetitionCode>(initialCompetition)
   const [zone]=useState<'UTC'|'KST'>(initialZone)
@@ -57,7 +59,7 @@ export function LocalMatchCentre({initialDate,initialResult,initialCompetition='
         <button type="button" aria-label="Previous KST day" onClick={()=>updateDate(shiftDay(date,-1))} disabled={!validDay(date)}> <ChevronLeft size={18} aria-hidden="true"/> </button>
         <button type="button" onClick={()=>updateDate(todayInKst())}>Today</button>
         <button type="button" aria-label="Next KST day" onClick={()=>updateDate(shiftDay(date,1))} disabled={!validDay(date)}> <ChevronRight size={18} aria-hidden="true"/> </button>
-        <label>KST date <input aria-label="Korean match date" type="date" value={date} onChange={event=>updateDate(event.target.value)}/></label>
+        <label>KST date <input id="local-kst-match-date" aria-label="Korean match date" type="date" value={date} onChange={event=>updateDate(event.target.value)}/></label>
       </div>
       <button className="load-button fixture-load-button" type="button" disabled={loading||!validDay(date)} onClick={request}>{loading?'Loading…':'Load real fixtures'}</button>
     </div>
