@@ -319,3 +319,43 @@ html[data-reduce-motion=true] *,html[data-reduce-motion=true] *::before,html[dat
 .m7-empty-note{padding:13px 15px;border:1px dashed #53725c;border-radius:10px}
 @media(max-width:850px){.m7-insight-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:380px){.m7-insights{padding:17px 13px}.m7-insight-grid{gap:8px}.m7-insight-grid>div{padding:12px}}
+
+/* M8: personal favorites hub — local-only sorting, filtering and navigation */
+.m8-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0 26px}
+.m8-overview>div{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:3px 12px;background:#20332b;border:1px solid #395947;border-radius:14px;padding:19px}
+.m8-overview svg{grid-row:span 2;color:#93ebad}
+.m8-overview strong{font-size:27px;color:#cff9dd;font-variant-numeric:tabular-nums}
+.m8-overview span{font-size:12px;color:#b5cabb}
+.m8-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin:22px 0}
+.m8-tabs{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.m8-tabs button{display:inline-flex;gap:9px;align-items:center;min-height:44px;border:1px solid #395547;border-radius:10px;background:#1b2c27;color:#c1d3c5;padding:10px 14px;font-size:13px;font-weight:700}
+.m8-tabs button.selected{background:#28543b;color:#c4f9d9;border-color:#69a784}
+.m8-tabs button span{font-size:11px;opacity:.75;font-variant-numeric:tabular-nums}
+.m8-search{display:flex;align-items:center;gap:9px;background:#1b2c27;border:1px solid #3a5a48;border-radius:10px;padding:0 12px;min-height:44px;flex:1;max-width:340px}
+.m8-search svg{flex:none;color:#93c6a7}
+.m8-search input{font:inherit;min-width:0;flex:1;padding:11px 0;background:transparent;color:#eef5f2;border:0;outline:none;font-size:13px}
+.m8-search:focus-within{outline:3px solid #8de9b0;outline-offset:2px}
+.m8-favorites-list{display:grid;gap:12px}
+.m8-favorite-card{display:flex;align-items:center;gap:15px;min-width:0;background:#1c2b29;border:1px solid #3a5145;border-radius:15px;padding:18px}
+.m8-favorite-card>.league-symbol{flex:none}
+.m8-favorite-main{min-width:120px;flex:1}
+.m8-favorite-main h2{font-size:17px;line-height:1.3;margin:6px 0;overflow-wrap:anywhere}
+.m8-favorite-main p{font-size:12px;color:#afc4b6;line-height:1.5;margin:6px 0 0}
+.m8-favorite-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px}
+.m8-favorite-actions .tile-link{white-space:nowrap;font-size:12px;padding-inline:3px}
+.m8-order-actions{display:flex;flex-direction:column;gap:5px;border-left:1px solid #365247;padding-left:11px}
+.m8-order-actions button{border:1px solid #3a5a48;border-radius:8px;background:#253f32;color:#d4f1dd;height:34px;width:36px;display:grid;place-items:center}
+.m8-order-actions button:disabled{opacity:.35;cursor:not-allowed}
+.m8-order-actions button:focus-visible,.m8-tabs button:focus-visible,.m8-search input:focus-visible,.m8-no-results button:focus-visible{outline:3px solid #8de9b0;outline-offset:2px}
+.m8-no-results{padding:27px;text-align:center;background:#1a2c26;border:1px dashed #4d6a57;border-radius:12px;color:#c4d6c8;font-size:13px}
+.m8-no-results button{border:0;background:none;color:#a0f1c0;text-decoration:underline;cursor:pointer;font-weight:700}
+.m8-footer-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:22px 0}
+.m8-confirm{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#302b26;border:1px solid #77584a;border-radius:10px;padding:13px}
+.m8-confirm strong{font-size:13px}
+.m8-available-leagues{margin:30px 0 0}
+.m8-available-leagues h2{font-size:17px}
+.m8-available-leagues>div{display:flex;flex-wrap:wrap;gap:8px}
+.m8-available-leagues a{font-size:12px;color:#acebc1;background:#243f32;border:1px solid #3a604a;border-radius:30px;padding:10px 13px;min-height:42px;display:inline-flex;align-items:center}
+.m8-available-leagues a:hover{background:#335b40}
+@media(max-width:820px){.m8-favorite-card{flex-wrap:wrap}.m8-favorite-actions{flex-basis:100%;justify-content:flex-start;padding-left:60px}.m8-order-actions{margin-left:auto;flex-direction:row;border:0;padding:0}}
+@media(max-width:600px){.m8-overview>div{padding:13px;grid-template-columns:1fr;gap:5px}.m8-overview svg{grid-row:auto;width:18px}.m8-overview strong{font-size:23px}.m8-toolbar{align-items:stretch}.m8-search{max-width:none;width:100%}.m8-favorite-card{padding:14px;gap:10px}.m8-favorite-main{min-width:0}.m8-favorite-actions{padding-left:0}.m8-order-actions{margin-left:0}.m8-favorite-actions .favorite-remove{min-height:44px}}
