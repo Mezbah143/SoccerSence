@@ -359,3 +359,12 @@ html[data-reduce-motion=true] *,html[data-reduce-motion=true] *::before,html[dat
 .m8-available-leagues a:hover{background:#335b40}
 @media(max-width:820px){.m8-favorite-card{flex-wrap:wrap}.m8-favorite-actions{flex-basis:100%;justify-content:flex-start;padding-left:60px}.m8-order-actions{margin-left:auto;flex-direction:row;border:0;padding:0}}
 @media(max-width:600px){.m8-overview>div{padding:13px;grid-template-columns:1fr;gap:5px}.m8-overview svg{grid-row:auto;width:18px}.m8-overview strong{font-size:23px}.m8-toolbar{align-items:stretch}.m8-search{max-width:none;width:100%}.m8-favorite-card{padding:14px;gap:10px}.m8-favorite-main{min-width:0}.m8-favorite-actions{padding-left:0}.m8-order-actions{margin-left:0}.m8-favorite-actions .favorite-remove{min-height:44px}}
+
+/* M9: Keyboard, focus and constrained-screen release safeguards. */
+.skip-to-content{position:fixed;z-index:100;top:10px;left:12px;transform:translateY(-160%);background:#a0f3bd;color:#11271c;border-radius:9px;padding:12px 18px;font-weight:800;font-size:14px}
+.skip-to-content:focus{transform:translateY(0);outline:3px solid #ffffff;outline-offset:2px}
+#main-content:focus{outline:none}
+button,select,input,a{touch-action:manipulation}
+@media(max-width:940px){.mobile-bottom-nav a{min-width:0}.mobile-bottom-nav a span{max-width:100%;overflow:hidden;text-overflow:ellipsis}.app main{padding-bottom:calc(128px + env(safe-area-inset-bottom))}}
+@media(max-width:360px){.mobile-bottom-nav a{letter-spacing:-.2px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}}

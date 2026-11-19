@@ -27,7 +27,7 @@ function Home(){
 function Detail(){const {id}=useParams();const m=fixtures.find(x=>x.id===id);return <div className="detail"><Link to="/">‹ Back to fixtures</Link>{m?<div className="detail-card"><p className="kicker">{m.competition} · FICTIONAL DEMO</p><h1>{m.home} <span>{m.score?m.score.join(' : '):'vs'}</span> {m.away}</h1><p>{m.status==='finished'?'Full time':'Scheduled'} · {m.time}</p><p>No match statistics are provided in demo mode.</p></div>:<h1>Match not found</h1>}</div>}
 function Standings(){return import.meta.env.DEV?<LocalStandings/>:<div className="empty"><Trophy size={38}/><h1>League standings</h1><p>Standings are not available in the public preview. Local development uses a separately verified data gateway.</p><Link to="/">Back to fixtures</Link></div>}
 function About(){return <div className="empty"><Info size={38}/><h1>About SoccerSense</h1><p>An independent football application being built with a strict $0 budget. All current matches and clubs are fictional.</p><a href="https://github.com/Mezbah143/SoccerSence">Explore GitHub documentation</a></div>}
-export function App(){return <div className="app"><PreferencesBridge/><ScrollToTop/><AppHeader/><main id="main-content">
+export function App(){return <div className="app"><PreferencesBridge/><ScrollToTop/><a className="skip-to-content" href="#main-content">Skip to main content</a><AppHeader/><main id="main-content" tabIndex={-1}>
   <div className="banner" role="status"><Info size={18}/><span><strong>Development preview.</strong> Demo fixtures are fictional. Local real fixtures are available only in development mode through your private gateway and are delayed, not live.</span></div>
   <Routes>
     <Route path="/" element={<Home/>}/>
@@ -42,5 +42,5 @@ export function App(){return <div className="app"><PreferencesBridge/><ScrollToT
     <Route path="/settings" element={<SettingsPage/>}/>
     <Route path="/team/:id" element={import.meta.env.DEV?<LocalTeamProfile/>:<div className="empty"><h1>Team profiles unavailable</h1><p>Local provider team profiles are not part of the public preview.</p><Link to="/leagues">Explore leagues</Link></div>}/>
     <Route path="/about" element={<About/>}/>
-    <Route path="*" element={<div className="empty">Page not found. <Link to="/">Go home</Link></div>}/>
+    <Route path="*" element={<div className="empty" role="status"><h1>Page not found</h1><p>This route does not exist in the SoccerSense preview.</p><Link to="/">Back to Matches</Link></div>}/>
   </Routes></main><footer>© SoccerSense · Development preview <span>Made for the beautiful game.</span></footer></div>}

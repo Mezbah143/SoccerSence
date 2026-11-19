@@ -46,6 +46,8 @@ jobs:
         env:
           FOOTBALL_API_KEY: SOCCERSENSE_TEST_ONLY_SECRET_SENTINEL
         run: npm run build
+      - name: Audit public build boundary and JavaScript budget
+        run: npm run audit:public
       - name: Build local data gateway
         run: npm run build:server
       - name: Guard against bundled API credentials
