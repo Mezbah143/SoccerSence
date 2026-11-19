@@ -1,7 +1,7 @@
 import { normalizeFootballDataList } from '../src/providers/footballData.js'
 import { normalizeFootballDataStandings } from '../src/providers/standings.js'
 import {normalizeTeamDetails,normalizeTeamResults} from '../src/providers/team.js'
-import { isLocalCompetition } from '../src/localCompetitions.js'
+import { isLocalCompetition,LOCAL_COMPETITIONS,LOCAL_COMPETITION_IDS,codeFromProviderId } from '../src/localCompetitions.js'
 import {fixtureDay,shiftDay,validDay} from '../src/dateNavigation.js'
 
 const UPSTREAM = 'https://api.football-data.org/v4'
@@ -11,11 +11,19 @@ export type GatewayConfig = { enabled: boolean; freePlanConfirmed: boolean; righ
 export type GatewayResult = { status: number; body: Record<string, unknown>; retryAfter?: number }
 export const error = (status: number, code: string): GatewayResult => ({ status, body: { error: code } })
 
-function parseRoute(path: string): { upstream: string; kind: 'fixtures' | 'standings' | 'team' | 'team-matches'; date?: string; zone?: 'UTC'|'KST'; competition:string; teamId?:string } | null {
+function parseRoute(path: string): { upstream: string; kind: 'fixtures' | 'all-fixtures' | 'standings' | 'team' | 'team-matches'; date?: string; zone?: 'UTC'|'KST'; competition:string; teamId?:string } | null {
   if (!path.startsWith('/api/') || path.includes('#')) return null
   const url = new URL(path, 'http://127.0.0.1:8787')
   const keys = [...url.searchParams.keys()]
-  if (new Set(keys).size !== keys.length || !isLocalCompetition(url.searchParams.get('competition'))) return null
+  if (new Set(keys).size !== keys.length) return null
+  if (url.pathname === '/api/all-fixtures' && keys.length === 2 && keys.includes('date') && keys.includes('tz') && url.searchParams.get('tz') === 'KST') {
+    const date=url.searchParams.get('date')??''
+    if(!validDay(date))return null
+    const start=shiftDay(date,-1),next=shiftDay(date,1)
+    const ids=LOCAL_COMPETITIONS.map(item=>LOCAL_COMPETITION_IDS[item.code]).join(',')
+    return {kind:'all-fixtures',upstream:'/matches?dateFrom='+start+'&dateTo='+next+'&competitions='+ids,date,zone:'KST',competition:'ALL'}
+  }
+  if (!isLocalCompetition(url.searchParams.get('competition')))return null
   const competition=url.searchParams.get('competition')!
   if ((url.pathname==='/api/team'||url.pathname==='/api/team-matches') && keys.length===2 && keys.includes('id')) {
     const id=url.searchParams.get('id')??''
@@ -100,6 +108,7 @@ export function createGateway(config: GatewayConfig, fetcher: typeof fetch = fet
           blockedOptional.add(route.kind)
           return error(403,'team_endpoint_denied')
         }
+        if (response.status === 403 && route.kind==='all-fixtures') return error(503,'aggregate_unavailable')
         if (response.status === 401 || response.status === 403) {
           accessDenied = true
           return error(response.status, response.status === 401 ? 'provider_unauthorized' : 'provider_forbidden')
@@ -132,6 +141,17 @@ export function createGateway(config: GatewayConfig, fetcher: typeof fetch = fet
       }
       if (!payload || typeof payload !== 'object' || !('matches' in payload) || !Array.isArray(payload.matches)) return error(502, 'invalid_provider_response')
       const matches = normalizeFootballDataList(payload, fetchedAt)
+      if (route.kind === 'all-fixtures') {
+        if (matches.length !== payload.matches.length) return error(502,'invalid_provider_response')
+        const grouped:Record<string,typeof matches> = Object.fromEntries(LOCAL_COMPETITIONS.map(item=>[item.code,[]]))
+        for (let i=0;i<payload.matches.length;i++) {
+          const raw=payload.matches[i] as {competition?:{id?:unknown}} | null
+          const code=codeFromProviderId(raw?.competition?.id)
+          if(!code)return error(502,'invalid_provider_response')
+          if(fixtureDay(matches[i].kickoffUtc,'KST')===route.date)grouped[code].push(matches[i])
+        }
+        return {status:200,body:{...meta,leagues:grouped}}
+      }
       // Do not silently present a partial/corrupt provider response as an empty/successful day.
       if (matches.length !== payload.matches.length) return error(502, 'invalid_provider_response')
       // Provider date-range responses may include adjacent UTC dates; enforce the requested

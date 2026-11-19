@@ -286,3 +286,60 @@ describe('local provider gateway', () => {
   })
 
 })
+
+
+describe('M12 one-call consolidated league gateway',()=>{
+  const route='/api/all-fixtures?date=2026-11-21&tz=KST'
+  const mk=(id:number,competitionId:number,utcDate:string)=>({
+    id,utcDate,status:'TIMED',competition:{id:competitionId,name:'Example League'},
+    homeTeam:{name:'Sample Home'},awayTeam:{name:'Sample Away'},
+  })
+  it('fetches six competitions in one request, groups by verified provider id and filters exact KST date',async()=>{
+    const fetcher=vi.fn<typeof fetch>().mockResolvedValue(json({matches:[
+      mk(1,2021,'2026-11-20T16:00:00Z'),mk(2,2014,'2026-11-21T14:00:00Z'),
+      mk(3,2021,'2026-11-21T16:00:00Z'),mk(4,2002,'2026-11-20T15:00:00Z'),
+    ]}))
+    const result=await createGateway(config,fetcher)(route)
+    expect(result.status).toBe(200)
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    expect(fetcher.mock.calls[0][0]).toBe('https://api.football-data.org/v4/matches?dateFrom=2026-11-20&dateTo=2026-11-22&competitions=2021,2014,2002,2019,2015,2003')
+    const leagues=result.body.leagues as Record<string,{id:string}[]>
+    expect(leagues.PL.map(m=>m.id)).toEqual(['1'])
+    expect(leagues.PD.map(m=>m.id)).toEqual(['2'])
+    expect(leagues.BL1.map(m=>m.id)).toEqual(['4'])
+    expect(Object.keys(leagues)).toHaveLength(6)
+    expect(result.body).toMatchObject({freshness:'delayed',source:'football-data.org'})
+    expect(JSON.stringify(result)).not.toContain(config.token)
+  })
+  it.each([
+    '/api/all-fixtures?date=2026-11-21',
+    '/api/all-fixtures?date=2026-11-21&tz=UTC',
+    '/api/all-fixtures?date=2026-11-21&tz=KST&token=secret',
+    '/api/all-fixtures?date=2026-11-99&tz=KST',
+  ])('rejects invalid aggregate routes without upstream calls: %s',async path=>{
+    const fetcher=vi.fn<typeof fetch>()
+    expect((await createGateway(config,fetcher)(path)).status).toBe(400)
+    expect(fetcher).not.toHaveBeenCalled()
+  })
+  it('rejects unexpected and corrupt competition identities rather than mislabeling a league',async()=>{
+    for(const item of [mk(1,9999,'2026-11-21T10:00:00Z'),{...mk(1,2021,'2026-11-21T10:00:00Z'),competition:{name:'no id'}}]){
+      const gateway=createGateway(config,vi.fn<typeof fetch>().mockResolvedValue(json({matches:[item]})))
+      expect((await gateway(route)).status).toBe(502)
+    }
+  })
+  it('does not disable valid single-league lookups after aggregate 403',async()=>{
+    const fetcher=vi.fn<typeof fetch>().mockImplementation(async url=>
+      String(url).includes('/v4/matches?')?new Response('restricted',{status:403}):json({matches:[]}))
+    const gateway=createGateway(config,fetcher)
+    expect((await gateway(route)).body.error).toBe('aggregate_unavailable')
+    expect((await gateway('/api/fixtures?competition=PL&date=2026-11-21')).status).toBe(200)
+    expect(fetcher).toHaveBeenCalledTimes(2)
+  })
+  it('uses the same shared rate limits without six separate calls',async()=>{
+    const fetcher=vi.fn<typeof fetch>().mockImplementation(async()=>json({matches:[]}))
+    const gateway=createGateway(config,fetcher,()=>0)
+    for(let i=0;i<6;i++)expect((await gateway(route)).status).toBe(200)
+    expect((await gateway(route)).status).toBe(429)
+    expect(fetcher).toHaveBeenCalledTimes(6)
+  })
+})
