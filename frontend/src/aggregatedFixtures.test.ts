@@ -53,7 +53,7 @@ describe('M12 consolidated automatic fixtures',()=>{
   it('fails visibly without retrying a 503 or 429',async()=>{
     for(const status of [503,429]){
       clearAggregateRequestCache()
-      const fetcher=vi.fn().mockResolvedValue({ok:false,status})
+      const fetcher=vi.fn().mockResolvedValue({ok:false,status,json:async()=>({error:status===503?'aggregate_unavailable':'local_rate_limit'})})
       vi.stubGlobal('fetch',fetcher)
       const task=loadAggregatedDay(day,new AbortController().signal)
       await expect(task).rejects.toThrow(status===503?'aggregate_unavailable':'rate_limited')
