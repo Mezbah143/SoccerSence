@@ -1,8 +1,9 @@
 import {useEffect,useState} from 'react'
-import {Link,NavLink,useLocation} from 'react-router-dom'
+import {Link,useLocation} from 'react-router-dom'
 import {CalendarDays,Goal,Heart,Menu,Newspaper,Search,Settings2,Trophy} from 'lucide-react'
 import {LOCAL_COMPETITIONS,localCompetitionName} from './localCompetitions'
-import {clearFavorites,DEFAULT_PREFERENCES,favoriteKey,getFavorites,savePreferences,toggleFavorite,useFavorites,usePreferences} from './localPreferences'
+import {isPrimarySectionActive} from './primaryNavigation'
+import {clearFavorites,DEFAULT_PREFERENCES,favoriteKey,savePreferences,toggleFavorite,useFavorites,usePreferences} from './localPreferences'
 
 const sections=[
   {to:'/',label:'Matches',Icon:CalendarDays},
@@ -12,22 +13,23 @@ const sections=[
   {to:'/more',label:'More',Icon:Menu},
 ]
 export function AppHeader(){
+  const location=useLocation()
   return <>
     <header className="site-header">
       <div className="site-header-inner">
         <Link to="/" className="logo" aria-label="SoccerSense Matches home"><span className="logo-mark"><Goal size={22} aria-hidden="true"/></span>Soccer<span>Sense</span><sup>ALPHA</sup></Link>
         <nav className="desktop-nav" aria-label="Primary navigation">
-          {sections.map(({to,label,Icon})=><NavLink key={to} to={to} end={to==='/'} className={({isActive})=>isActive?'active':''}><Icon size={17} aria-hidden="true"/>{label}</NavLink>)}
+          {sections.map(({to,label,Icon})=><Link key={to} to={to} aria-current={isPrimarySectionActive(location.pathname,to)?'page':undefined} className={isPrimarySectionActive(location.pathname,to)?'active':''}><Icon size={17} aria-hidden="true"/>{label}</Link>)}
         </nav>
         <div className="header-actions" aria-label="Quick actions">
-          <NavLink to="/search" className="icon-action" aria-label="Search clubs and leagues" title="Search"><Search size={19}/></NavLink>
+          <Link to="/search" className={location.pathname==='/search'?'icon-action active':'icon-action'} aria-label="Search clubs and leagues" title="Search"><Search size={19}/></Link>
           <Link to="/?calendar=1" className="icon-action" aria-label="Open match calendar" title="Match calendar"><CalendarDays size={19}/></Link>
-          <NavLink to="/settings" className="icon-action" aria-label="Settings" title="Settings"><Settings2 size={19}/></NavLink>
+          <Link to="/settings" className={location.pathname==='/settings'?'icon-action active':'icon-action'} aria-label="Settings" title="Settings"><Settings2 size={19}/></Link>
         </div>
       </div>
     </header>
     <nav className="mobile-bottom-nav" aria-label="Mobile primary navigation">
-      {sections.map(({to,label,Icon})=><NavLink key={to} to={to} end={to==='/'} className={({isActive})=>isActive?'active':''}><Icon size={20} aria-hidden="true"/><span>{label}</span></NavLink>)}
+      {sections.map(({to,label,Icon})=><Link key={to} to={to} aria-current={isPrimarySectionActive(location.pathname,to)?'page':undefined} className={isPrimarySectionActive(location.pathname,to)?'active':''}><Icon size={20} aria-hidden="true"/><span>{label}</span></Link>)}
     </nav>
   </>
 }
@@ -110,10 +112,6 @@ export function MorePage(){
 }
 export function SettingsPage(){
   const preferences=usePreferences()
-  useEffect(()=>{
-    document.documentElement.dataset.density=preferences.compactCards?'compact':'comfortable'
-    document.documentElement.dataset.reduceMotion=preferences.reduceMotion?'true':'false'
-  },[preferences])
   return <section aria-label="Settings">
     <PageHeading eyebrow="MAKE IT YOURS" title="Settings" description="Simple local preferences. No account is required and nothing is sent to our servers."/>
     <div className="settings-list">
@@ -123,6 +121,14 @@ export function SettingsPage(){
     <div className="settings-info"><h2>Time and data</h2><p><strong>Match dates:</strong> Korea Standard Time (KST) for the local match centre, including fixtures around UTC midnight.</p><p><strong>Data:</strong> Delayed provider information is displayed only in local development, after a manual Load action. No live score claims.</p><p><strong>Favorites:</strong> Stored in this browser. Clear them from Favorites, or remove site data in your browser settings.</p></div>
     <button type="button" className="subtle-button" onClick={()=>savePreferences(DEFAULT_PREFERENCES)}>Reset appearance preferences</button>
   </section>
+}
+export function PreferencesBridge(){
+  const preferences=usePreferences()
+  useEffect(()=>{
+    document.documentElement.dataset.density=preferences.compactCards?'compact':'comfortable'
+    document.documentElement.dataset.reduceMotion=preferences.reduceMotion?'true':'false'
+  },[preferences])
+  return null
 }
 export function ScrollToTop(){
   const location=useLocation()
