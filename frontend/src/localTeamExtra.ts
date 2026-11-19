@@ -1,6 +1,6 @@
 import {isLocalCompetition,type LocalCompetitionCode} from './localCompetitions'
 import type {TeamDetails,TeamResult} from './providers/team'
-const ATTRIBUTION='Football data provided by the Football-Data.org API'
+const ATTRIBUTION='Football data provided by the Football-Data.org API' as const
 const obj=(v:unknown):Record<string,unknown>|null=>v!==null&&typeof v==='object'&&!Array.isArray(v)?v as Record<string,unknown>:null
 const label=(v:unknown):v is string=>typeof v==='string'&&v.length>0&&v.length<=240&&!!v.trim()
 const id=(v:unknown):v is string=>typeof v==='string'&&/^[1-9]\d{0,8}$/.test(v)
