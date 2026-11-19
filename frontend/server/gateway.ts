@@ -19,7 +19,7 @@ function parseRoute(path: string): { upstream: string; kind: 'fixtures' | 'stand
   const competition=url.searchParams.get('competition')!
   if ((url.pathname==='/api/team'||url.pathname==='/api/team-matches') && keys.length===2 && keys.includes('id')) {
     const id=url.searchParams.get('id')??''
-    if(!/^[1-9]\\d{0,8}$/.test(id))return null
+    if(!/^[1-9]\d{0,8}$/.test(id))return null
     return {upstream:url.pathname==='/api/team'?'/teams/'+id:'/teams/'+id+'/matches?status=FINISHED&limit=5',
       kind:url.pathname==='/api/team'?'team':'team-matches',competition,teamId:id}
   }
