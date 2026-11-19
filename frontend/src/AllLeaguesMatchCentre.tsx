@@ -17,7 +17,7 @@ export function AllLeaguesMatchCentre(){
   const [day,setDay]=useState(restored?.day??todayInKst)
   const [responses,setResponses]=useState<DayResults>(()=>getCachedDay(restored?.day??todayInKst()))
   const [busy,setBusy]=useState(false)
-  const [progress,setProgress]=useState({done:0,total:LOCAL_COMPETITIONS.length})
+  const [progress,setProgress]=useState<{done:number;total:number}>({done:0,total:LOCAL_COMPETITIONS.length})
   const abort=useRef<AbortController|null>(null)
   const order=useMemo(()=>orderedCompetitions(favoriteItems,isLocalCompetition(shortcut)?shortcut:undefined),[favoriteItems,shortcut])
   useEffect(()=>{
