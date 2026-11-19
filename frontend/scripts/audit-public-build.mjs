@@ -18,6 +18,8 @@ function files(dir){
 }
 const all=files(root)
 if(!all.some(f=>f.endsWith('/index.html')))throw Error('Missing public index.html')
+const headers=readFileSync(join(root,'_headers'),'utf8')
+if(!headers.includes("Content-Security-Policy:")||!headers.includes("connect-src 'self'"))throw Error('Missing static-preview security headers')
 const assets=all.filter(f=>/\.(js|html|css)$/i.test(f))
 if(assets.length<2)throw Error('Missing production assets')
 let bytes=0
@@ -31,4 +33,5 @@ for(const file of assets){
 const jsSize=all.filter(f=>f.endsWith('.js')).reduce((n,f)=>n+statSync(f).size,0)
 if(jsSize>900_000)throw Error('Uncompressed JavaScript exceeded 900KB; investigate bundle size')
 console.info('SoccerSense public-build guard passed: '+assets.length+' text assets, '+bytes+' bytes, JS '+jsSize+' bytes.')
+console.info('Static preview header rules verified (Cloudflare Pages only).')
 console.info('This does not grant permission to redistribute real football data publicly.')
