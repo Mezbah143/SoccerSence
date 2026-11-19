@@ -8,6 +8,7 @@ import {presentMatch} from './matchPresentation'
 import {getCachedDay,loadMatchDay,orderedCompetitions,storeMatchDayResult,type DayResults} from './multiLeagueFixtures'
 import {useFavorites} from './localPreferences'
 import {readVerifiedMatchState} from './realMatchState'
+import {aggregateErrorMessage,autoResultsAvailable,loadAggregatedDay} from './aggregatedFixtures'
 
 export function AllLeaguesMatchCentre(){
   const location=useLocation()
@@ -17,6 +18,8 @@ export function AllLeaguesMatchCentre(){
   const [day,setDay]=useState(restored?.day??todayInKst)
   const [responses,setResponses]=useState<DayResults>(()=>getCachedDay(restored?.day??todayInKst()))
   const [busy,setBusy]=useState(false)
+  const [autoLoading,setAutoLoading]=useState(true)
+  const [autoError,setAutoError]=useState('')
   const [progress,setProgress]=useState<{done:number;total:number}>({done:0,total:LOCAL_COMPETITIONS.length})
   const abort=useRef<AbortController|null>(null)
   const order=useMemo(()=>orderedCompetitions(favoriteItems,isLocalCompetition(shortcut)?shortcut:undefined),[favoriteItems,shortcut])
@@ -29,17 +32,35 @@ export function AllLeaguesMatchCentre(){
   },[])
   useEffect(()=>()=>abort.current?.abort(),[])
   useEffect(()=>{
+    const cached=getCachedDay(day)
+    if(autoResultsAvailable(cached)){setAutoLoading(false);setAutoError('');return}
+    const controller=new AbortController()
+    setAutoLoading(true)
+    setAutoError('')
+    // Debounce date scrubbing; one consolidated request, not six requests.
+    const timer=setTimeout(()=>{
+      void loadAggregatedDay(day,controller.signal).then(result=>{
+        if(!controller.signal.aborted)setResponses(current=>({...current,...result}))
+      }).catch(error=>{
+        if(!controller.signal.aborted)setAutoError(aggregateErrorMessage(error))
+      }).finally(()=>{if(!controller.signal.aborted)setAutoLoading(false)})
+    },700)
+    return ()=>{clearTimeout(timer);controller.abort()}
+  },[day])
+  useEffect(()=>{
     if(new URLSearchParams(location.search).get('calendar')==='1')document.getElementById('all-leagues-kst-date')?.focus()
   },[location.search])
   function changeDay(next:string){
     abort.current?.abort()
     setBusy(false)
+    setAutoError('')
+    setAutoLoading(true)
     setProgress({done:0,total:LOCAL_COMPETITIONS.length})
     setDay(next)
     setResponses(getCachedDay(next))
   }
   async function loadAll(){
-    if(!validDay(day)||busy)return
+    if(!validDay(day)||busy||autoLoading)return
     const controller=new AbortController()
     abort.current=controller
     setBusy(true)
@@ -71,9 +92,11 @@ export function AllLeaguesMatchCentre(){
       <label className="m11-calendar"><CalendarDays size={18} aria-hidden="true"/><span className="sr-only">Korean date</span><input id="all-leagues-kst-date" type="date" aria-label="Korean match date" value={day} onChange={e=>changeDay(e.target.value)}/></label>
     </div>
     <div className="m11-load-bar">
-      <p><Info size={16} aria-hidden="true"/><span>Each new league requires a separate, sequential private-gateway request. Nothing loads automatically. Already loaded days reuse temporary in-memory results; switching dates makes no request.</span></p>
-      <button className="load-button" type="button" disabled={busy||!validDay(day)||ready===6} onClick={loadAll}>{busy?`Loading leagues… ${progress.done}/${progress.total}`:ready===6?'All leagues loaded':ready>0?'Load remaining fixtures':'Load all fixtures'}</button>
+      <p><Info size={16} aria-hidden="true"/><span>Matches load automatically with one private, quota-limited multi-league request per selected KST date. Previously loaded days reuse memory. No polling, automatic retries or public real-data access.</span></p>
+      <button className="load-button" type="button" disabled={busy||autoLoading||!validDay(day)||ready===6} onClick={loadAll}>{busy?`Loading leagues… ${progress.done}/${progress.total}`:ready===6?'All leagues loaded':ready>0?'Load remaining fixtures':'Load all fixtures'}</button>
     </div>
+    {autoLoading&&<p className="m11-progress" role="status">Loading all six leagues automatically through one consolidated gateway request…</p>}
+    {autoError&&<div className="m11-league-notice m11-error" role="alert">{autoError}</div>}
     {busy&&<p className="m11-progress" role="status">Loading {progress.done} of {progress.total} competitions. Sequential only; no retries or refresh polling.</p>}
     <div className="m11-league-sections">
       {order.map(league=>{
@@ -86,7 +109,7 @@ export function AllLeaguesMatchCentre(){
             <Link to={'/standings?competition='+league.code} aria-label={'View '+league.name+' standings'}>Standings <ChevronRight size={16} aria-hidden="true"/></Link>
           </div>
           {item?.error&&<div className="m11-league-notice m11-error" role="alert">{item.error}</div>}
-          {!item?.error&&!result&&<div className="m11-league-notice">Not loaded yet. Select “Load all fixtures” to check this league.</div>}
+          {!item?.error&&!result&&<div className="m11-league-notice">Not loaded yet. Automatic loading is in progress or unavailable; use manual loading if needed.</div>}
           {result&&<div className="m11-league-source">Delayed · Retrieved {new Date(result.fetchedAt).toLocaleString('en-GB',{timeZone:'Asia/Seoul'})} KST · {result.attribution}</div>}
           {result&&result.matches.length===0&&<div className="m11-league-notice">No matches returned for {day} KST.</div>}
           {result&&result.matches.length>0&&<div className="m11-matches">
