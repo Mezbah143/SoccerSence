@@ -429,3 +429,12 @@ button,select,input,a{touch-action:manipulation}
   .m11-heading{margin-top:16px}
   .m11-fixture-card{padding:12px}
 }
+
+/* M13: retain club vs national-team tournament hierarchy without new imagery. */
+.m13-competition-wrap{min-width:0}
+.m13-group-heading{padding:10px 2px 4px;margin:9px 0 14px;border-bottom:1px solid #355046}
+.m13-group-heading h2{margin:0 0 6px;color:#d5f5e0;font-size:21px;letter-spacing:-.4px}
+.m13-group-heading p{margin:0 0 13px;font-size:12px;line-height:1.6;color:#a4c5b0}
+.m13-directory-heading{font-size:21px;letter-spacing:-.4px;margin:28px 0 16px}
+.m13-league-directory>.m13-directory-heading:first-child{margin-top:8px}
+@media(max-width:570px){.m13-group-heading h2,.m13-directory-heading{font-size:19px}.m13-group-heading{margin-top:7px}}
