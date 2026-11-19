@@ -33,7 +33,7 @@ export function FavoritesHub(){
       <div><Trophy size={20} aria-hidden="true"/><strong>{counts.league}</strong><span>Leagues</span></div>
       <div><Star size={20} aria-hidden="true"/><strong>{counts.team}</strong><span>Clubs</span></div>
     </div>
-    {saved.length===0?<div className="empty"><Heart size={34} aria-hidden="true"/><h3>Your matchday starts here</h3><p>Choose leagues to follow, then save clubs from verified local standings. Your shortlist stays on this device.</p><Link to="/leagues">Explore six leagues</Link></div>:
+    {saved.length===0?<div className="empty"><Heart size={34} aria-hidden="true"/><h3>Your matchday starts here</h3><p>Choose leagues to follow, then save clubs from verified local standings. Your shortlist stays on this device.</p><Link to="/leagues">Explore competitions</Link></div>:
       <>
         <div className="m8-toolbar">
           <div className="m8-tabs" role="group" aria-label="Favorite type">
@@ -76,6 +76,6 @@ export function FavoritesHub(){
       </>
     }
     <p className="page-note">This page saves only allowlisted competition codes, club IDs, and names (up to 30 entries). It does not store verified provider responses, synchronize devices, or automatically retrieve scores. Saved club links return to the relevant league's standings.</p>
-    <div className="m8-available-leagues"><h2>Quick league shortcuts</h2><div>{LOCAL_COMPETITIONS.map(l=><Link key={l.code} to={'/standings?competition='+l.code}>{l.name}</Link>)}</div></div>
+    <div className="m8-available-leagues"><h2>Quick competition shortcuts</h2><div>{LOCAL_COMPETITIONS.map(l=><Link key={l.code} to={'/standings?competition='+l.code}>{l.name}</Link>)}</div></div>
   </section>
 }
