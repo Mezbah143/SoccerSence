@@ -15,8 +15,8 @@ const demoResult=parseLocalFixtures({
   }],
 },day,'KST')
 beforeEach(()=>clearMatchDayCache())
-describe('M11 six-league match loading',()=>{
-  it('only issues six sequential calls when explicitly invoked, and saves verified day results',async()=>{
+describe('M11 multi-competition match loading',()=>{
+  it('only issues all sequential calls when explicitly invoked, and saves verified day results',async()=>{
     const active={count:0,max:0}
     const loader=vi.fn(async()=>{
       active.count++;active.max=Math.max(active.max,active.count)
@@ -27,12 +27,12 @@ describe('M11 six-league match loading',()=>{
     const updates:string[]=[]
     expect(loader).not.toHaveBeenCalled()
     await loadMatchDay(day,new AbortController().signal,loader,(code)=>updates.push(code))
-    expect(loader).toHaveBeenCalledTimes(6)
+    expect(loader).toHaveBeenCalledTimes(LOCAL_COMPETITIONS.length)
     expect(active.max).toBe(1)
     expect(updates).toEqual(LOCAL_COMPETITIONS.map(x=>x.code))
-    expect(Object.keys(getCachedDay(day))).toHaveLength(6)
+    expect(Object.keys(getCachedDay(day))).toHaveLength(LOCAL_COMPETITIONS.length)
     await loadMatchDay(day,new AbortController().signal,loader,()=>{})
-    expect(loader).toHaveBeenCalledTimes(6)
+    expect(loader).toHaveBeenCalledTimes(LOCAL_COMPETITIONS.length)
   })
   it('stops on quota rejection and leaves remaining leagues as not requested',async()=>{
     const loader=vi.fn().mockResolvedValueOnce(demoResult).mockRejectedValueOnce(new Error('rate_limited'))
@@ -47,11 +47,11 @@ describe('M11 six-league match loading',()=>{
     const loader=vi.fn().mockRejectedValueOnce(new Error('gateway_unavailable')).mockResolvedValue(demoResult)
     const updated:string[]=[]
     await loadMatchDay(day,new AbortController().signal,loader,code=>updated.push(code))
-    expect(loader).toHaveBeenCalledTimes(6)
-    expect(updated).toHaveLength(6)
-    expect(Object.keys(getCachedDay(day))).toHaveLength(5)
+    expect(loader).toHaveBeenCalledTimes(LOCAL_COMPETITIONS.length)
+    expect(updated).toHaveLength(LOCAL_COMPETITIONS.length)
+    expect(Object.keys(getCachedDay(day))).toHaveLength(LOCAL_COMPETITIONS.length-1)
     await loadMatchDay(day,new AbortController().signal,loader,()=>{})
-    expect(loader).toHaveBeenCalledTimes(7)
+    expect(loader).toHaveBeenCalledTimes(LOCAL_COMPETITIONS.length+1)
   })
   it('cancels requests and does not publish stale results after date changes',async()=>{
     const controller=new AbortController()
