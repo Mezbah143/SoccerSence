@@ -1,4 +1,5 @@
 import {useMemo,useState} from 'react'
+import {TeamLogo} from './TeamLogo'
 import {Link} from 'react-router-dom'
 import {ArrowDown,ArrowUp,Heart,Search,Star,Trophy,Trash2} from 'lucide-react'
 import {LOCAL_COMPETITIONS,localCompetitionName} from './localCompetitions'
@@ -50,7 +51,7 @@ export function FavoritesHub(){
               const label=item.kind==='league'?localCompetitionName(item.id):localCompetitionName(item.competition)
               const competition=item.kind==='league'?item.id:item.competition
               return <article className="m8-favorite-card" key={favoriteKey(item)}>
-                <span className="league-symbol" aria-hidden="true">{item.kind==='league'?<Trophy size={20}/>:<Star size={20}/>}</span>
+                {item.kind==='league'?<span className="league-symbol" aria-hidden="true"><Trophy size={20}/></span>:<TeamLogo teamId={item.id} teamName={item.name} size={40}/>}
                 <div className="m8-favorite-main"><span className="tile-overline">{item.kind==='league'?'SAVED LEAGUE':'SAVED CLUB · '+label}</span><h2>{item.name}</h2>
                   {item.kind==='team'&&<p>Club profiles require loading a verified standings table; no unverified direct links are used.</p>}
                 </div>
