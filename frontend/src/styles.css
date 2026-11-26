@@ -459,3 +459,13 @@ button,select,input,a{touch-action:manipulation}
 .m18-standing-name a{overflow-wrap:anywhere}
 .m11-fixture-clubs .team-logo,.real-side .team-logo,.team-profile-header .team-logo{flex-shrink:0}
 @media(max-width:480px){.m18-standing-name{gap:6px}.m11-fixture-clubs .team-logo{max-width:32px;max-height:32px}}
+
+/* M19: opt-in local artwork preview, not the public team crest registry. */
+.m19-artwork-preview{background:#182b24;border:1px solid #41674e;border-radius:14px;padding:20px;margin:24px 0}
+.m19-artwork-preview h2{font-size:19px;margin:0 0 12px}
+.m19-artwork-preview p{font-size:12px;line-height:1.7;color:#b6d3c1}
+.m19-artwork-preview .load-button{margin:8px 0}
+.m19-artwork-result{display:flex;align-items:center;gap:18px;background:#233c2c;border-radius:12px;padding:16px;margin-top:12px}
+.m19-artwork-result img{object-fit:contain;flex-shrink:0}
+.m19-artwork-result strong{color:#e4f6e8}
+@media(max-width:420px){.m19-artwork-preview{padding:14px}.m19-artwork-result{gap:10px}.m19-artwork-result img{width:58px;height:58px}}

@@ -1,4 +1,5 @@
 import {useEffect,useState} from 'react'
+import {SportsDbArtworkPreview} from './SportsDbArtworkPreview'
 import {Link,useLocation} from 'react-router-dom'
 import {CalendarDays,Goal,Heart,Menu,Newspaper,Search,Settings2,Trophy} from 'lucide-react'
 import {LOCAL_COMPETITIONS,localCompetitionName,isInternationalCompetition} from './localCompetitions'
@@ -115,6 +116,7 @@ export function SettingsPage(){
       <label><span><strong>Reduce animations</strong><small>Turn off hover movement and interface transitions</small></span><input type="checkbox" checked={preferences.reduceMotion} onChange={e=>savePreferences({...preferences,reduceMotion:e.target.checked})}/></label>
     </div>
     <div className="settings-info"><h2>Time and data</h2><p><strong>Match dates:</strong> Korea Standard Time (KST) for the local match centre, including fixtures around UTC midnight.</p><p><strong>Data:</strong> Delayed provider information is displayed only in local development, after a manual Load action. No live score claims.</p><p><strong>Favorites:</strong> Stored in this browser. Clear them from Favorites, or remove site data in your browser settings.</p></div>
+    {import.meta.env.DEV&&<SportsDbArtworkPreview/>}
     <button type="button" className="subtle-button" onClick={()=>savePreferences(DEFAULT_PREFERENCES)}>Reset appearance preferences</button>
   </section>
 }

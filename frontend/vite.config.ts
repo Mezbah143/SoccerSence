@@ -9,6 +9,13 @@ export default defineConfig({
     host:'127.0.0.1',
     strictPort:true,
     proxy:{
+      // Development-only fixed artwork lookup. Never turn into an arbitrary URL proxy.
+      '/sportsdb-preview':{
+        target:'https://www.thesportsdb.com',
+        changeOrigin:true,
+        secure:true,
+        rewrite:()=>'/api/v1/json/123/searchteams.php?t=Arsenal',
+      },
       '/api':{
         target:'http://127.0.0.1:8787',
         changeOrigin:true,
