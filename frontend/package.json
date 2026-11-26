@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "build:server": "tsc -p tsconfig.server.json",
     "serve:data": "npm run build:server && node --env-file-if-exists=.env.server .server/server/index.js",
-    "audit:public": "node scripts/audit-public-build.mjs"
+    "audit:public": "node scripts/audit-public-build.mjs",
+    "verify:release": "node scripts/verify-release-contract.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
