@@ -48,6 +48,8 @@ jobs:
         run: npm run build
       - name: Audit public build boundary and JavaScript budget
         run: npm run audit:public
+      - name: Verify localhost and fictional-public release boundaries
+        run: npm run verify:release
       - name: Build local data gateway
         run: npm run build:server
       - name: Guard against bundled API credentials
