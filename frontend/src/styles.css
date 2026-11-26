@@ -450,3 +450,12 @@ button,select,input,a{touch-action:manipulation}
 .m11-date-item:focus-visible,.m11-date-arrow:focus-visible,.m11-calendar input:focus-visible,.m14-help-toggle:focus-visible{outline:3px solid #9cf2bd;outline-offset:2px}
 .m11-fixture-clubs strong{overflow-wrap:anywhere}
 @media(max-width:600px){.m11-load-bar{padding:12px}.m11-league{padding:12px}.m11-fixture-card{gap:8px}.m14-league-count{font-size:10px}}
+
+/* M18 — permission-controlled team identity, neutral until artwork rights verified. */
+.team-logo{display:inline-grid;place-items:center;flex:none;border-radius:50%;overflow:hidden;vertical-align:middle;background:#253f34;border:1px solid #4b7059;color:#cff7df;box-sizing:border-box}
+.team-logo img{display:block;width:100%;height:100%;object-fit:contain;padding:3px;box-sizing:border-box}
+.team-logo-placeholder{display:grid;place-items:center;width:100%;height:100%;font-size:clamp(10px,1.3vw,16px);font-weight:800;letter-spacing:.03em;line-height:1;text-align:center}
+.m18-standing-name{display:inline-flex;align-items:center;gap:9px;min-width:0;text-align:left}
+.m18-standing-name a{overflow-wrap:anywhere}
+.m11-fixture-clubs .team-logo,.real-side .team-logo,.team-profile-header .team-logo{flex-shrink:0}
+@media(max-width:480px){.m18-standing-name{gap:6px}.m11-fixture-clubs .team-logo{max-width:32px;max-height:32px}}
