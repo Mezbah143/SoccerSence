@@ -20,6 +20,7 @@ export function AllLeaguesMatchCentre(){
   const [busy,setBusy]=useState(false)
   const [autoLoading,setAutoLoading]=useState(true)
   const [autoError,setAutoError]=useState('')
+  const [showLoadingInfo,setShowLoadingInfo]=useState(false)
   const [progress,setProgress]=useState<{done:number;total:number}>({done:0,total:LOCAL_COMPETITIONS.length})
   const abort=useRef<AbortController|null>(null)
   const order=useMemo(()=>orderedCompetitions(favoriteItems,isLocalCompetition(shortcut)?shortcut:undefined).sort((a,b)=>Number(isInternationalCompetition(a.code))-Number(isInternationalCompetition(b.code))),[favoriteItems,shortcut])
@@ -51,6 +52,7 @@ export function AllLeaguesMatchCentre(){
     if(new URLSearchParams(location.search).get('calendar')==='1')document.getElementById('all-leagues-kst-date')?.focus()
   },[location.search])
   function changeDay(next:string){
+    if(!validDay(next)||next===day)return
     abort.current?.abort()
     setBusy(false)
     setAutoError('')
@@ -92,11 +94,14 @@ export function AllLeaguesMatchCentre(){
       <label className="m11-calendar"><CalendarDays size={18} aria-hidden="true"/><span className="sr-only">Korean date</span><input id="all-leagues-kst-date" type="date" aria-label="Korean match date" value={day} onChange={e=>changeDay(e.target.value)}/></label>
     </div>
     <div className="m11-load-bar">
-      <p><Info size={16} aria-hidden="true"/><span>Matches load automatically with one private, quota-limited multi-league request per selected KST date. Previously loaded days reuse memory. No polling, automatic retries or public real-data access.</span></p>
+      <div className="m14-load-caption"><Info size={16} aria-hidden="true"/><span>Automatic KST fixtures · delayed data · one consolidated request per date</span>
+        <button type="button" className="m14-help-toggle" aria-expanded={showLoadingInfo} onClick={()=>setShowLoadingInfo(v=>!v)}>{showLoadingInfo?'Hide details':'How loading works'}</button>
+      </div>
+      {showLoadingInfo&&<p className="m14-load-details">Nine supported competitions share one private, quota-limited request. Previously loaded results are reused in memory. No polling or automatic retries. The manual button is a fallback.</p>}
       <button className="load-button" type="button" disabled={busy||autoLoading||!validDay(day)||ready===LOCAL_COMPETITIONS.length} onClick={loadAll}>{busy?`Loading leagues… ${progress.done}/${progress.total}`:ready===LOCAL_COMPETITIONS.length?'All leagues loaded':ready>0?'Load remaining fixtures':'Load all fixtures'}</button>
     </div>
-    {autoLoading&&<p className="m11-progress" role="status">Loading supported club and international competitions automatically through one consolidated gateway request…</p>}
-    {autoError&&<div className="m11-league-notice m11-error" role="alert">{autoError}</div>}
+    {autoLoading&&<p className="m11-progress" role="status">Checking nine competitions for {day} KST…</p>}
+    {autoError&&<div className="m11-league-notice m11-error" role="alert"><strong>Automatic loading unavailable.</strong> {autoError} <span>Use “Load all fixtures” only if you want to spend additional gateway requests.</span></div>}
     {busy&&<p className="m11-progress" role="status">Loading {progress.done} of {progress.total} competitions. Sequential only; no retries or refresh polling.</p>}
     <div className="m11-league-sections">
       {order.map((league,index)=>{
@@ -104,16 +109,17 @@ export function AllLeaguesMatchCentre(){
         const result=item?.result
         const isFavorite=favoriteItems.some(f=>f.kind==='league'&&f.id===league.code)
         const international=isInternationalCompetition(league.code)
+        const statusText=result?result.matches.length+' match'+(result.matches.length===1?'':'es'):item?.error?'Error':'Not loaded'
         return <div className="m13-competition-wrap" key={league.code}>
           {(index===0 || (international&&!isInternationalCompetition(order[index-1].code)))&&
             <div className="m13-group-heading"><h2>{international?'International tournaments':'Club competitions'}</h2><p>{international?'National teams · World Cup and European Championship':'Domestic leagues and UEFA Champions League'}</p></div>}
           <section className="m11-league" aria-label={league.name+' fixtures'}>
           <div className="m11-league-heading">
-            <div><Trophy size={21} aria-hidden="true"/><h2>{league.name}</h2>{isFavorite&&<Star size={15} aria-label="Saved league" className="m11-saved-star"/>}</div>
+            <div><Trophy size={21} aria-hidden="true"/><h2>{league.name}</h2>{isFavorite&&<Star size={15} aria-label="Saved league" className="m11-saved-star"/>}<span className="m14-league-count">{statusText}</span></div>
             <Link to={'/standings?competition='+league.code} aria-label={'View '+league.name+' standings'}>Standings <ChevronRight size={16} aria-hidden="true"/></Link>
           </div>
           {item?.error&&<div className="m11-league-notice m11-error" role="alert">{item.error}</div>}
-          {!item?.error&&!result&&<div className="m11-league-notice">Not loaded yet. Automatic loading is in progress or unavailable; use manual loading if needed.</div>}
+          {!item?.error&&!result&&<div className="m11-league-notice">{autoLoading?'Checking fixtures…':'Not loaded. You can use the manual fallback.'}</div>}
           {result&&<div className="m11-league-source">Delayed · Retrieved {new Date(result.fetchedAt).toLocaleString('en-GB',{timeZone:'Asia/Seoul'})} KST · {result.attribution}</div>}
           {result&&result.matches.length===0&&<div className="m11-league-notice">No matches returned for {day} KST.</div>}
           {result&&result.matches.length>0&&<div className="m11-matches">
