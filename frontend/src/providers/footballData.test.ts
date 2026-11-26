@@ -9,10 +9,13 @@ describe('football-data.org v4 response adapter', () => {
       utcDate: '2026-11-16T18:00:00Z',
       status: 'SCHEDULED',
       competition: { name: 'Example Competition' },
-      homeTeam: { name: 'Example Home' },
-      awayTeam: { name: 'Example Away' },
+      homeTeam: { id: 57, name: 'Example Home', crest: 'https://crests.football-data.org/57.png' },
+      awayTeam: { id: 65, name: 'Example Away', crest: 'https://crests.football-data.org/65.png' },
       score: { fullTime: { home: null, away: null } },
     }, fetched)
+    expect(match?.homeTeamId).toBe('57')
+    expect(match?.awayTeamId).toBe('65')
+    expect(JSON.stringify(match)).not.toContain('crests.football-data.org')
     expect(match?.homeScore).toBeNull()
     expect(match?.awayScore).toBeNull()
     expect(match?.freshness).toBe('delayed')
@@ -31,4 +34,10 @@ describe('football-data.org v4 response adapter', () => {
 
 it.each([-1, 1.5, Number.POSITIVE_INFINITY])('rejects an impossible score from %s', score => {
   expect(normalizeFootballDataMatch({id: 1, utcDate: fetched, score: {fullTime: {home: score, away: 0}}}, fetched)).toMatchObject({homeScore: null, awayScore: 0})
+})
+
+it('does not invent malformed, absent or pre-match TBD team IDs',()=>{
+ const base={id:2,utcDate:'2026-11-16T18:00:00Z'}
+ expect(normalizeFootballDataMatch({...base,homeTeam:{id:'57',name:'Home'},awayTeam:{id:-1,name:'Away'}},fetched)).toMatchObject({homeTeamId:null,awayTeamId:null})
+ expect(normalizeFootballDataMatch({...base,homeTeam:null,awayTeam:null},fetched)).toMatchObject({homeTeamId:null,awayTeamId:null})
 })

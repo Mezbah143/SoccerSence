@@ -1,4 +1,5 @@
 import {useEffect,useRef,useState} from 'react'
+import {TeamLogo} from './TeamLogo'
 import {Link,useLocation} from 'react-router-dom'
 import {readVerifiedTeamState} from './realTeamState'
 import {Info,Trophy} from 'lucide-react'
@@ -72,7 +73,7 @@ export function LocalStandings() {
             <th scope="col" title="Points">Pts</th>
           </tr></thead>
           <tbody>{table.rows.map(row=><tr key={row.teamId}>
-            <td>{row.position}</td><th scope="row"><Link className="standings-team-link" to={'/team/'+row.teamId} state={{competition,result,teamId:row.teamId,tableIndex:index}} aria-label={'View '+row.team+' team profile'}>{row.team}</Link></th><td>{row.played}</td>
+            <td>{row.position}</td><th scope="row"><span className="m18-standing-name"><TeamLogo teamId={row.teamId} teamName={row.team} size={28}/><Link className="standings-team-link" to={'/team/'+row.teamId} state={{competition,result,teamId:row.teamId,tableIndex:index}} aria-label={'View '+row.team+' team profile'}>{row.team}</Link></span></th><td>{row.played}</td>
             <td>{row.won}</td><td>{row.drawn}</td><td>{row.lost}</td>
             <td>{row.goalsFor}</td><td>{row.goalsAgainst}</td>
             <td>{row.goalDifference>0?'+'+row.goalDifference:row.goalDifference}</td>

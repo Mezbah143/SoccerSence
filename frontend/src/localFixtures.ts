@@ -10,6 +10,8 @@ export type LocalFixture = {
   competition: string
   home: string
   away: string
+  homeTeamId: string | null
+  awayTeamId: string | null
   kickoffUtc: string
   status: string
   homeScore: number | null
@@ -29,6 +31,7 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 const isDate = (value: unknown): value is string =>
   typeof value === 'string' && Number.isFinite(Date.parse(value))
+const validTeamId = (value: unknown) => value === null || (typeof value === 'string' && /^[1-9]\d{0,14}$/.test(value))
 const validScore = (value: unknown) =>
   value === null || (typeof value === 'number' && Number.isSafeInteger(value) && value >= 0)
 
@@ -42,9 +45,12 @@ export function parseLocalFixtures(value: unknown, requestedDate: string, zone:'
         typeof item.home !== 'string' || typeof item.away !== 'string' ||
         typeof item.competition !== 'string' || typeof item.status !== 'string' ||
         !isDate(item.kickoffUtc) || fixtureDay(item.kickoffUtc,zone) !== requestedDate ||
-        !validScore(item.homeScore) || !validScore(item.awayScore)) throw new Error('invalid_response')
+        !validScore(item.homeScore) || !validScore(item.awayScore) ||
+        !validTeamId(item.homeTeamId ?? null) || !validTeamId(item.awayTeamId ?? null)) throw new Error('invalid_response')
     return {
       id: item.id, home: item.home, away: item.away,
+      homeTeamId:(item.homeTeamId as string | null | undefined) ?? null,
+      awayTeamId:(item.awayTeamId as string | null | undefined) ?? null,
       competition: item.competition, status: item.status,
       kickoffUtc: item.kickoffUtc,
       homeScore: item.homeScore as number | null,
