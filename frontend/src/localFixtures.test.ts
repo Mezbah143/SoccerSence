@@ -1,7 +1,7 @@
 import {describe,it,expect,vi,afterEach} from 'vitest'
 import {loadLocalFixtures,parseLocalFixtures,utcKickoffLabel} from './localFixtures'
 const fixture = {
-  id:'560643',home:'Example Home FC',away:'Example Away FC',
+  id:'560643',home:'Example Home FC',away:'Example Away FC',homeTeamId:'57',awayTeamId:'65',
   competition:'Premier League',kickoffUtc:'2026-11-21T12:30:00.000Z',
   status:'TIMED',homeScore:null,awayScore:null,
 }
@@ -16,8 +16,15 @@ describe('local fixtures UI adapter',()=>{
   it('validates and preserves null scores and source attribution',()=>{
     const result=parseLocalFixtures(response,'2026-11-21')
     expect(result.matches).toHaveLength(1)
+    expect(result.matches[0].homeTeamId).toBe('57')
+    expect(result.matches[0].awayTeamId).toBe('65')
     expect(result.matches[0].homeScore).toBeNull()
     expect(result.freshness).toBe('delayed')
+  })
+  it('allows missing or null IDs for a TBD team but rejects malicious IDs',()=>{
+    const missing={...fixture,homeTeamId:undefined,awayTeamId:null}
+    expect(parseLocalFixtures({...response,matches:[missing]},'2026-11-21').matches[0]).toMatchObject({homeTeamId:null,awayTeamId:null})
+    expect(()=>parseLocalFixtures({...response,matches:[{...fixture,homeTeamId:'../../etc/passwd'}]},'2026-11-21')).toThrow('invalid_response')
   })
   it('refuses unexpected off-day fixtures',()=>{
     expect(()=>parseLocalFixtures({...response,matches:[{...fixture,kickoffUtc:'2026-11-22T12:30:00Z'}]},'2026-11-21')).toThrow('invalid_response')
