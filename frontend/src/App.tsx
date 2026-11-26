@@ -26,7 +26,7 @@ function Detail(){const {id}=useParams();const m=fixtures.find(x=>x.id===id);ret
 function Standings(){return import.meta.env.DEV?<LocalStandings/>:<div className="empty"><Trophy size={38}/><h1>League standings</h1><p>Standings are not available in the public preview. Local development uses a separately verified data gateway.</p><Link to="/">Back to fixtures</Link></div>}
 function About(){return <div className="empty"><Info size={38}/><h1>About SoccerSense</h1><p>An independent football application being built with a strict $0 budget. All current matches and clubs are fictional.</p><a href="https://github.com/Mezbah143/SoccerSence">Explore GitHub documentation</a></div>}
 export function App(){return <div className="app"><PreferencesBridge/><ScrollToTop/><a className="skip-to-content" href="#main-content">Skip to main content</a><AppHeader/><main id="main-content" tabIndex={-1}>
-  <div className="banner" role="status"><Info size={18}/><span><strong>Development preview.</strong> Demo fixtures are fictional. Local real fixtures are available only in development mode through your private gateway and are delayed, not live.</span></div>
+  <div className="banner m14-banner" role="note"><Info size={17} aria-hidden="true"/><span><strong>{import.meta.env.DEV?"Local development":"Fictional public preview"}.</strong> {import.meta.env.DEV?"Real provider scores are delayed, not live. The gateway stays private.":"All displayed fixture data is fictional; real provider data is not published."}</span></div>
   <Routes>
     <Route path="/" element={<Home/>}/>
     <Route path="/match/:id" element={<Detail/>}/>
