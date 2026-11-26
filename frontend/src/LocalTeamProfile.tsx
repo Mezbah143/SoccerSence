@@ -6,6 +6,7 @@ import {TeamExtraPanel} from './TeamExtraPanel'
 import {FavoriteButton} from './SiteSections'
 import {seasonTableInsights} from './verifiedInsights'
 import {standingPeers} from './competitionDiscovery'
+import {TableComparison} from './TableComparison'
 
 export function LocalTeamProfile(){
   const {id}=useParams()
@@ -66,6 +67,7 @@ export function LocalTeamProfile(){
         <span>#{peer.position}</span><strong>{peer.team}</strong><span>{peer.points} pts</span>
       </Link>)}</div>
     </section>
+    <TableComparison key={teamId+'-'+tableIndex} table={table} team={team}/>
     <TeamExtraPanel competition={competition} teamId={teamId}/>
     <div className="source-panel"><ShieldCheck size={16} aria-hidden="true"/> <strong>{result.source}</strong> · Delayed data · Retrieved {new Date(result.fetchedAt).toLocaleString('en-GB',{timeZone:'Asia/Seoul'})} KST<div>{result.attribution}</div></div>
     <p className="mode-hint">Local development only · No external crests, photos or premium team data.</p>
