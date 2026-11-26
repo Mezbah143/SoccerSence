@@ -464,3 +464,19 @@ button,select,input,a{touch-action:manipulation}
 .m15-team-neighbors a strong{flex:1;overflow-wrap:anywhere}
 .m15-team-neighbors a:hover{border-color:#8de4b0}
 @media(max-width:540px){.m15-team-neighbors>div{grid-template-columns:1fr}.m15-competition-actions label{max-width:none}}
+
+/* M16: source-bound table comparison, no additional provider fetch. */
+.m16-comparison{background:#1c2d29;border:1px solid #40634c;border-radius:15px;padding:20px;margin:23px 0}
+.m16-heading{display:flex;align-items:center;gap:13px}.m16-heading svg{color:#92ebb5;flex:none}
+.m16-heading h2{font-size:20px;margin:6px 0 8px}
+.m16-comparison>p{font-size:12px;line-height:1.6;color:#b9d0c2}.m16-comparison>p svg{vertical-align:middle;color:#8de6ae}
+.m16-picker{display:grid;gap:8px;font-size:12px;font-weight:750;color:#c7dfce;margin:16px 0;max-width:390px}
+.m16-picker select{width:100%;background:#223a30;color:#f0f9f4;border:1px solid #547964;border-radius:9px;min-height:44px;padding:10px;font:inherit}
+.m16-picker select:focus-visible{outline:3px solid #8de7b2;outline-offset:2px}
+.m16-compare-scroll{width:100%;overflow-x:auto}
+.m16-compare-scroll table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;min-width:390px}
+.m16-compare-scroll caption{text-align:left;color:#a5c9b4;font-size:11px;padding:10px 0}
+.m16-compare-scroll th,.m16-compare-scroll td{border-bottom:1px solid #365345;padding:12px 10px;font-size:12px;text-align:right}
+.m16-compare-scroll th:first-child{text-align:left}.m16-compare-scroll thead th{color:#bdf5d0;background:#274334;overflow-wrap:anywhere}
+.m16-compare-scroll tbody th{color:#c7dcd0}.m16-comparison .m16-note{margin:15px 0 0;color:#a5c5b2}
+@media(max-width:540px){.m16-comparison{padding:14px}.m16-compare-scroll th,.m16-compare-scroll td{padding:10px 7px}}
