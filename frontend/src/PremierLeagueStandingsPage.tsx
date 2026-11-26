@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState} from 'react'
 import {Link,useLocation} from 'react-router-dom'
 import {readVerifiedTeamState} from './realTeamState'
+import {findStandingRows,tableSnapshot} from './competitionDiscovery'
 import {Info,Trophy} from 'lucide-react'
 import {useSearchParams} from 'react-router-dom'
 import {loadLocalStandings,type LocalStandingsResult} from './localStandings'
@@ -14,11 +15,13 @@ export function LocalStandings() {
   const [result,setResult]=useState<LocalStandingsResult|null>(restored?.result??null)
   const [loading,setLoading]=useState(false)
   const [error,setError]=useState('')
+  const [clubFilter,setClubFilter]=useState('')
   const controller=useRef<AbortController|null>(null)
   useEffect(()=>()=>controller.current?.abort(),[])
   const updateCompetition=(next:LocalCompetitionCode)=>{
     controller.current?.abort()
     setCompetition(next)
+    setClubFilter('')
     setResult(null)
     setError('')
     setLoading(false)
@@ -45,7 +48,7 @@ export function LocalStandings() {
       if (!next.signal.aborted) setLoading(false)
     }
   }
-  return <section aria-label="Local Premier League standings">
+  return <section aria-label="Verified local competition standings">
     <div className="section-title">
       <div><p className="kicker">LOCAL DATA EXPERIMENT</p><h2>{localCompetitionName(competition)} standings</h2></div>
       <span className="pill">Delayed standings</span>
@@ -59,8 +62,10 @@ export function LocalStandings() {
       <div>{result.attribution}</div>
     </div>}
     {result&&result.tables.length===0&&<div className="empty"><Trophy size={38} aria-hidden="true"/><h3>No standings available</h3><p>The provider returned no league tables for this competition. No demo table is shown.</p></div>}
+    {result&&<div className="m15-competition-actions"><label>Find a club in the loaded table <input type="search" value={clubFilter} maxLength={90} placeholder="Search club names…" onChange={e=>setClubFilter(e.target.value)}/></label><Link to={'/?competition='+competition} className="tile-link">View competition fixtures ›</Link></div>}
     {result&&result.tables.map((table,index)=><section key={table.stage+'-'+(table.group??'')+'-'+index} aria-label={table.group??table.stage} className="standings-section">
       {result.tables.length>1&&<h3>{table.group??table.stage}</h3>}
+      <p className="m15-table-summary">{tableSnapshot(table).clubs} listed teams · {table.group??table.stage} · Top position: {tableSnapshot(table).top?.team??'Not available'} · Table entries only</p>
       <div className="standings-scroll">
         <table className="standings-table">
           <caption>{result.competition} · {table.group??table.stage} · delayed standings</caption>
@@ -71,7 +76,7 @@ export function LocalStandings() {
             <th scope="col" title="Goals against">GA</th><th scope="col" title="Goal difference">GD</th>
             <th scope="col" title="Points">Pts</th>
           </tr></thead>
-          <tbody>{table.rows.map(row=><tr key={row.teamId}>
+          <tbody>{findStandingRows(table.rows,clubFilter).map(row=><tr key={row.teamId}>
             <td>{row.position}</td><th scope="row"><Link className="standings-team-link" to={'/team/'+row.teamId} state={{competition,result,teamId:row.teamId,tableIndex:index}} aria-label={'View '+row.team+' team profile'}>{row.team}</Link></th><td>{row.played}</td>
             <td>{row.won}</td><td>{row.drawn}</td><td>{row.lost}</td>
             <td>{row.goalsFor}</td><td>{row.goalsAgainst}</td>
@@ -81,6 +86,7 @@ export function LocalStandings() {
         </table>
       </div>
       {table.rows.length===0&&<p className="mode-hint">No rows in this table.</p>}
+      {table.rows.length>0&&findStandingRows(table.rows,clubFilter).length===0&&<p className="m15-table-summary" role="status">No verified clubs match your search in this table.</p>}
     </section>)}
   </section>
 }
