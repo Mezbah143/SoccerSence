@@ -1,4 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react'
+import {TeamLogo} from './TeamLogo'
 import {Link,useLocation} from 'react-router-dom'
 import {CalendarDays,ChevronLeft,ChevronRight,Clock3,Info,Star,Trophy} from 'lucide-react'
 import {shiftDay,todayInKst,validDay} from './dateNavigation'
@@ -126,8 +127,8 @@ export function AllLeaguesMatchCentre(){
             {result.matches.map(match=><Link className="m11-fixture-card" to={'/real-match/'+match.id} key={match.id} state={{mode:'local',day,result,competition:league.code,zone:'KST'}}>
               <span className="m11-fixture-time"><Clock3 size={14} aria-hidden="true"/> {utcKickoffLabel(match.kickoffUtc)}</span>
               <div className="m11-fixture-clubs">
-                <div><span className="crest" aria-hidden="true">{match.home.slice(0,2).toUpperCase()}</span><strong>{match.home}</strong><b>{match.homeScore??'–'}</b></div>
-                <div><span className="crest purple" aria-hidden="true">{match.away.slice(0,2).toUpperCase()}</span><strong>{match.away}</strong><b>{match.awayScore??'–'}</b></div>
+                <div><TeamLogo teamId={match.homeTeamId} teamName={match.home} size={36}/><strong>{match.home}</strong><b>{match.homeScore??'–'}</b></div>
+                <div><TeamLogo teamId={match.awayTeamId} teamName={match.away} size={36}/><strong>{match.away}</strong><b>{match.awayScore??'–'}</b></div>
               </div>
               <span className={'m11-fixture-status m6-status-'+presentMatch(match).tone}>{presentMatch(match).label}</span>
             </Link>)}
