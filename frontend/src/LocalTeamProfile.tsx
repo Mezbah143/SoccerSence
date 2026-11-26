@@ -1,4 +1,5 @@
 import {Link,useLocation,useParams} from 'react-router-dom'
+import {TeamLogo} from './TeamLogo'
 import {Info,ShieldCheck,Trophy} from 'lucide-react'
 import {readVerifiedTeamState} from './realTeamState'
 import {localCompetitionName} from './localCompetitions'
@@ -21,7 +22,7 @@ export function LocalTeamProfile(){
   return <section className="detail team-profile" aria-label="Local team profile">
     <Link to="/standings" state={{competition,result,teamId,tableIndex}}>‹ Back to {localCompetitionName(competition)} standings</Link>
     <div className="team-profile-header">
-      <span className="crest team-profile-monogram" aria-hidden="true">{team.team.slice(0,2).toUpperCase()}</span>
+      <TeamLogo teamId={teamId} teamName={team.team} size={66}/>
       <div>
         <p className="kicker">LOCAL TEAM PROFILE · DELAYED</p>
         <h1>{team.team}</h1>
