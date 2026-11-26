@@ -5,6 +5,7 @@ import {localCompetitionName} from './localCompetitions'
 import {TeamExtraPanel} from './TeamExtraPanel'
 import {FavoriteButton} from './SiteSections'
 import {seasonTableInsights} from './verifiedInsights'
+import {standingPeers} from './competitionDiscovery'
 
 export function LocalTeamProfile(){
   const {id}=useParams()
@@ -57,6 +58,13 @@ export function LocalTeamProfile(){
         <div><strong>{insights.goalsAgainstPerMatch}</strong><span>Goals conceded / game</span></div>
       </div>:<p className="m7-empty-note">This club has no recorded matches in the selected table, so percentages and per-game averages are unavailable.</p>}
       <p className="m7-insights-footnote">Based on {team.played} played match{team.played===1?'':'es'}. These aggregates do not indicate upcoming match outcomes and require no additional provider request.</p>
+    </section>
+    <section className="m15-team-neighbors" aria-label="Explore other clubs in this verified table">
+      <h2>Explore nearby table positions</h2>
+      <p>Other clubs from the same verified {table.group??table.stage} table, ordered by position distance. Not a head-to-head comparison.</p>
+      <div>{standingPeers(table,teamId).map(peer=><Link key={peer.teamId} to={'/team/'+peer.teamId} state={{competition,result,teamId:peer.teamId,tableIndex}}>
+        <span>#{peer.position}</span><strong>{peer.team}</strong><span>{peer.points} pts</span>
+      </Link>)}</div>
     </section>
     <TeamExtraPanel competition={competition} teamId={teamId}/>
     <div className="source-panel"><ShieldCheck size={16} aria-hidden="true"/> <strong>{result.source}</strong> · Delayed data · Retrieved {new Date(result.fetchedAt).toLocaleString('en-GB',{timeZone:'Asia/Seoul'})} KST<div>{result.attribution}</div></div>
