@@ -438,3 +438,15 @@ button,select,input,a{touch-action:manipulation}
 .m13-directory-heading{font-size:21px;letter-spacing:-.4px;margin:28px 0 16px}
 .m13-league-directory>.m13-directory-heading:first-child{margin-top:8px}
 @media(max-width:570px){.m13-group-heading h2,.m13-directory-heading{font-size:19px}.m13-group-heading{margin-top:7px}}
+
+/* M14: compact preview information and date/fixture focus at phone sizes */
+.m14-banner{padding:9px 13px;margin-bottom:14px;font-size:12px;line-height:1.45}
+.m14-load-caption{display:flex;align-items:center;gap:9px;flex-wrap:wrap;color:#bbd9c7;font-size:12px;flex:1;min-width:205px}
+.m14-load-caption svg{flex:none;color:#9ce2b8}
+.m14-help-toggle{border:1px solid #45694d;background:#263e31;color:#b7f4ce;padding:8px 10px;border-radius:8px;font-size:12px;min-height:38px}
+.m14-load-details{flex-basis:100%;margin:0;color:#bdd0c4;font-size:12px;line-height:1.6}
+.m14-league-count{font-size:11px;border:1px solid #355a43;border-radius:20px;padding:4px 8px;color:#bbd8c7;white-space:nowrap}
+.m11-league-heading>div{flex-wrap:wrap}
+.m11-date-item:focus-visible,.m11-date-arrow:focus-visible,.m11-calendar input:focus-visible,.m14-help-toggle:focus-visible{outline:3px solid #9cf2bd;outline-offset:2px}
+.m11-fixture-clubs strong{overflow-wrap:anywhere}
+@media(max-width:600px){.m11-load-bar{padding:12px}.m11-league{padding:12px}.m11-fixture-card{gap:8px}.m14-league-count{font-size:10px}}
