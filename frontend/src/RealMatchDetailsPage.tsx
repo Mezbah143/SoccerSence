@@ -1,4 +1,5 @@
 import {Link,useLocation,useParams} from 'react-router-dom'
+import {TeamLogo} from './TeamLogo'
 import {ArrowLeft,ArrowRight,CalendarClock,ChevronLeft,ChevronRight,Clock3,Info,ShieldCheck,Trophy} from 'lucide-react'
 import {utcKickoffLabel} from './localFixtures'
 import {readVerifiedMatchState} from './realMatchState'
@@ -36,12 +37,12 @@ export function RealMatchDetailsPage(){
         <span className={'m6-status m6-status-'+presentation.tone}>{presentation.label}</span>
       </div>
       <div className="real-scoreboard">
-        <div className="real-side"><span className="crest" aria-hidden="true">{match.home.slice(0,2).toUpperCase()}</span><h1>{match.home}</h1><span className="m6-side-caption">Home</span></div>
+        <div className="real-side"><TeamLogo teamId={match.homeTeamId} teamName={match.home} size={66}/><h1>{match.home}</h1><span className="m6-side-caption">Home</span></div>
         <div className="m6-score-middle">
           <strong className="m6-score-value" aria-label={presentation.scoreLabel}>{presentation.hasScore?<>{match.homeScore} <span>:</span> {match.awayScore}</>:'VS'}</strong>
           <span className="m6-score-freshness">Delayed data · Not live</span>
         </div>
-        <div className="real-side"><span className="crest purple" aria-hidden="true">{match.away.slice(0,2).toUpperCase()}</span><h1>{match.away}</h1><span className="m6-side-caption">Away</span></div>
+        <div className="real-side"><TeamLogo teamId={match.awayTeamId} teamName={match.away} size={66}/><h1>{match.away}</h1><span className="m6-side-caption">Away</span></div>
       </div>
       {!presentation.hasScore&&<p className="m6-score-note">No final score is available. The match status and kickoff are shown without predicting a result.</p>}
       <p className="real-kickoff"><CalendarClock size={17} aria-hidden="true"/> Kickoff {utcKickoffLabel(match.kickoffUtc)}</p>
