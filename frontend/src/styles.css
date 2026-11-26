@@ -450,3 +450,17 @@ button,select,input,a{touch-action:manipulation}
 .m11-date-item:focus-visible,.m11-date-arrow:focus-visible,.m11-calendar input:focus-visible,.m14-help-toggle:focus-visible{outline:3px solid #9cf2bd;outline-offset:2px}
 .m11-fixture-clubs strong{overflow-wrap:anywhere}
 @media(max-width:600px){.m11-load-bar{padding:12px}.m11-league{padding:12px}.m11-fixture-card{gap:8px}.m14-league-count{font-size:10px}}
+
+/* M15: existing-data-only competition and nearby-club discovery. */
+.m15-competition-actions{display:flex;justify-content:space-between;align-items:end;gap:15px;flex-wrap:wrap;margin:18px 0}
+.m15-competition-actions label{display:grid;gap:8px;color:#b2d7bf;font-size:12px;font-weight:700;flex:1;max-width:400px;min-width:200px}
+.m15-competition-actions input{min-height:44px;background:#1d302a;color:#e3f7ea;border:1px solid #3c6951;border-radius:9px;padding:10px 12px;font:inherit}
+.m15-table-summary{font-size:12px;line-height:1.6;color:#afcbbd;margin:12px 0}
+.m15-team-neighbors{border:1px solid #3e5c4c;border-radius:14px;padding:19px;margin:22px 0;background:#1c2f29}
+.m15-team-neighbors h2{font-size:19px;margin:0 0 8px}
+.m15-team-neighbors p{color:#bad0c2;font-size:12px;line-height:1.7}
+.m15-team-neighbors>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.m15-team-neighbors a{display:flex;align-items:center;gap:9px;padding:13px;background:#243d31;border:1px solid #42634d;border-radius:9px;min-width:0;font-size:12px}
+.m15-team-neighbors a strong{flex:1;overflow-wrap:anywhere}
+.m15-team-neighbors a:hover{border-color:#8de4b0}
+@media(max-width:540px){.m15-team-neighbors>div{grid-template-columns:1fr}.m15-competition-actions label{max-width:none}}
